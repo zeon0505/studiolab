@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Dashboard') — Admin UPT Studiolab</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 antialiased min-h-screen">
+
+<div class="flex min-h-screen">
+
+    {{-- ===== SIDEBAR ===== --}}
+    <aside class="w-60 shrink-0 bg-slate-900 flex flex-col" style="position:sticky;top:0;height:100vh;">
+
+        {{-- Brand --}}
+        <div class="px-5 py-5 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center shrink-0">
+                    <i class="fas fa-video text-white text-xs"></i>
+                </div>
+                <div class="leading-tight">
+                    <span class="block text-[11px] font-bold text-white uppercase tracking-widest">UPT Studiolab</span>
+                    <span class="text-[10px] text-slate-400 font-medium">STAIMAS Wonogiri</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Navigation --}}
+        <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">MANAJEMEN</p>
+
+            <a href="{{ route('admin.dashboard') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
+                      {{ request()->routeIs('admin.dashboard') ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                <i class="fas fa-table-list w-4 text-center {{ request()->routeIs('admin.dashboard') ? 'text-teal-700' : 'text-slate-400' }}"></i>
+                <span>Daftar Peminjaman</span>
+            </a>
+
+            <a href="{{ route('admin.history') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
+                      {{ request()->routeIs('admin.history') ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                <i class="fas fa-history w-4 text-center {{ request()->routeIs('admin.history') ? 'text-teal-700' : 'text-slate-400' }}"></i>
+                <span>Riwayat Peminjaman</span>
+            </a>
+
+            <a href="{{ route('admin.items.index', ['tipe' => 'ruangan']) }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
+                      {{ request()->routeIs('admin.items.*') && request('tipe') === 'ruangan' ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                <i class="fas fa-door-open w-4 text-center {{ request()->routeIs('admin.items.*') && request('tipe') === 'ruangan' ? 'text-teal-700' : 'text-slate-400' }}"></i>
+                <span>Kelola Ruangan</span>
+            </a>
+
+            <a href="{{ route('admin.items.index', ['tipe' => 'peralatan']) }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
+                      {{ request()->routeIs('admin.items.*') && request('tipe') === 'peralatan' ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                <i class="fas fa-camera w-4 text-center {{ request()->routeIs('admin.items.*') && request('tipe') === 'peralatan' ? 'text-teal-700' : 'text-slate-400' }}"></i>
+                <span>Kelola Peralatan</span>
+            </a>
+
+            <a href="{{ route('admin.assignments.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
+                      {{ request()->routeIs('admin.assignments.*') ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                <i class="fas fa-user-clock w-4 text-center {{ request()->routeIs('admin.assignments.*') ? 'text-teal-700' : 'text-slate-400' }}"></i>
+                <span>PJ Harian</span>
+            </a>
+
+            <a href="{{ route('admin.scan-qr') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
+                      {{ request()->routeIs('admin.scan-qr') ? 'bg-teal-500 text-white font-semibold shadow-sm shadow-teal-900/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                <i class="fas fa-qrcode w-4 text-center {{ request()->routeIs('admin.scan-qr') ? 'text-white' : 'text-slate-400' }}"></i>
+                <span>Scan QR Code</span>
+                <span class="ml-auto text-[8px] font-black px-1.5 py-0.5 rounded-md {{ request()->routeIs('admin.scan-qr') ? 'bg-white/20 text-white' : 'bg-teal-500/20 text-teal-400' }} uppercase tracking-wider">Baru</span>
+            </a>
+
+            <div class="pt-3 mt-3 border-t border-white/5">
+                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">LAINNYA</p>
+                <a href="{{ route('home') }}" target="_blank"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-150">
+                    <i class="fas fa-arrow-up-right-from-square w-4 text-center text-slate-400"></i>
+                    <span>Lihat Website</span>
+                </a>
+            </div>
+        </nav>
+
+        {{-- User Info --}}
+        <div class="px-3 py-4 border-t border-white/5">
+            <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/5">
+                <div class="w-7 h-7 rounded-full bg-teal-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    {{ strtoupper(substr(Auth::user()?->name ?? 'A', 0, 1)) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-[12px] font-semibold text-white block truncate">{{ Auth::user()?->name ?? 'Admin' }}</span>
+                    <span class="text-[10px] text-slate-400 block">Administrator</span>
+                </div>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" title="Keluar" class="text-slate-500 hover:text-red-400 transition-colors text-xs">
+                        <i class="fas fa-arrow-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    {{-- ===== MAIN CONTENT ===== --}}
+    <div class="flex-grow flex flex-col min-w-0">
+
+        {{-- Top Header Bar --}}
+        <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
+            <div>
+                <h1 class="text-[15px] font-bold text-slate-900">@yield('title', 'Dashboard')</h1>
+                <p class="text-[11px] text-slate-400 font-medium mt-0.5">Portal UPT Studio & Lab STAIMAS Wonogiri</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-[11px] text-slate-500">
+                    <i class="far fa-clock mr-1"></i>
+                    {{ now()->translatedFormat('l, d F Y') }}
+                </span>
+            </div>
+        </header>
+
+        {{-- Page Content --}}
+        <main class="flex-grow p-8">
+
+            {{-- Flash Messages --}}
+            @if(session()->has('success'))
+                <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[12px] p-3.5 rounded-xl flex items-center gap-3 mb-6">
+                    <i class="fas fa-check-circle text-emerald-500"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+            @if(session()->has('error'))
+                <div class="bg-red-50 border border-red-200 text-red-800 text-[12px] p-3.5 rounded-xl flex items-center gap-3 mb-6">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @yield('content')
+        </main>
+    </div>
+
+</div>
+
+</body>
+</html>
