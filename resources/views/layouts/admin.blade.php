@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
@@ -26,8 +27,8 @@
         {{-- Brand --}}
         <div class="px-5 py-5 border-b border-white/5">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center shrink-0">
-                    <i class="fas fa-video text-white text-xs"></i>
+                <div class="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+                    <img src="{{ asset('logo-web.jpg') }}" alt="STAIMAS" class="w-full h-full object-contain">
                 </div>
                 <div class="leading-tight">
                     <span class="block text-[11px] font-bold text-white uppercase tracking-widest">UPT Studiolab</span>

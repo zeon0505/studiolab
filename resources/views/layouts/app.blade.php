@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Portal Studio & Lab') — UPT STAIMAS Wonogiri</title>
+    <title>@yield('title', 'Gema Studio') — UPT STAIMAS Wonogiri</title>
     <meta name="description" content="Portal peminjaman Studio & Laboratorium UPT STAIMAS Wonogiri. Pinjam peralatan dan ruangan secara online.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         * { font-family: 'Inter', sans-serif; }
-
-        @livewireStyles
     </style>
+    @livewireStyles
 </head>
 <body class="bg-white text-slate-800 antialiased">
 
@@ -49,13 +48,11 @@
     <header class="sticky top-0 bg-white border-b border-slate-100 z-40">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="{{ route('home') }}" class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl overflow-hidden bg-teal-50 flex items-center justify-center border border-teal-100">
-                    <img src="{{ asset('assest/LOGO STAIMAS AI.png') }}" alt="STAIMAS"
-                         class="w-full h-full object-contain"
-                         onerror="this.src='https://staimaswonogiri.ac.id/wp-content/uploads/2020/07/LOGO-STAIMAS-AI.png'">
+                <div style="width: 55px; height: 55px; border-radius: 12px; overflow: hidden; background-color: #ffffff; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;">
+                    <img src="{{ asset('logo-web.jpg') }}" alt="STAIMAS" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); transform-origin: center;">
                 </div>
                 <div class="leading-tight">
-                    <span class="block text-[13px] font-bold text-slate-900 tracking-tight">Portal Studio & Lab</span>
+                    <span class="block text-[13px] font-bold text-slate-900 tracking-tight">Gema Studio</span>
                     <span class="text-[10px] font-semibold text-teal-600 uppercase tracking-wider">UPT STAIMAS Wonogiri</span>
                 </div>
             </a>
