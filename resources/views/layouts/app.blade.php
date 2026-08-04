@@ -53,7 +53,7 @@
                 </div>
                 <div class="leading-tight">
                     <span class="block text-[13px] font-bold text-slate-900 tracking-tight">Gema Studio</span>
-                    <span class="text-[10px] font-semibold text-teal-600 uppercase tracking-wider">UPT STAIMAS Wonogiri</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider" style="color: #0a5e50;">UPT STAIMAS Wonogiri</span>
                 </div>
             </a>
 
