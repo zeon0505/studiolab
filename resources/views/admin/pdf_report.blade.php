@@ -159,7 +159,7 @@
         <p>Wonogiri, {{ now()->translatedFormat('d F Y') }}</p>
         <p>Mengetahui,</p>
         <p style="margin-top: 5px; color: #4b5563;">Kepala UPT Studio & Lab</p>
-        <p class="signature">{{ Auth::user()->name }}</p>
+        <p class="signature">Muhammad Umar Khadafi, M.Sos</p>
     </div>
 
 </body>
