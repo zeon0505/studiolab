@@ -89,7 +89,7 @@
 
     <div class="header">
         <h1>Unit Pelaksana Teknis (UPT) Studio & Laboratorium</h1>
-        <h2>Sekolah Tinggi Agama Islam Masjid Syuhada (STAIMAS) Wonogiri</h2>
+        <h2>Sekolah Tinggi Agama Islam Mulia Astuti Wonogiri (STAIMAS)</h2>
         <p>Alamat: Wonogiri, Jawa Tengah | Email: info@staimaswonogiri.ac.id | Telp: +62 822-2320-4552</p>
     </div>
 
