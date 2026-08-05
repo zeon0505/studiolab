@@ -15,6 +15,20 @@
     
     <style>
         * { font-family: 'Inter', sans-serif; }
+        
+        /* Mobile Sidebar Custom CSS */
+        @media (max-width: 767px) {
+            #admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            #admin-sidebar.active {
+                transform: translateX(0);
+            }
+            #mobile-sidebar-overlay.active {
+                display: block !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100 antialiased min-h-screen">
@@ -187,14 +201,14 @@
 
         if (sidebar && overlay) {
             function openSidebar() {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
                 document.body.classList.add('overflow-hidden');
             }
 
             function closeSidebar() {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
                 document.body.classList.remove('overflow-hidden');
             }
 
