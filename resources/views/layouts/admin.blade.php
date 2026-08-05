@@ -19,13 +19,29 @@
 </head>
 <body class="bg-slate-100 antialiased min-h-screen">
 
-<div class="flex min-h-screen">
+<div class="flex flex-col md:flex-row min-h-screen">
+
+    {{-- ===== MOBILE HEADER ===== --}}
+    <div class="md:hidden bg-slate-900 px-5 py-4 flex items-center justify-between sticky top-0 z-30 border-b border-white/5">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+                <img src="{{ asset('logo-web.jpg') }}" alt="STAIMAS" class="w-full h-full object-contain">
+            </div>
+            <div class="leading-tight">
+                <span class="block text-[11px] font-bold text-white uppercase tracking-widest">UPT Studiolab</span>
+                <span class="text-[9px] text-slate-400 font-medium">STAIMAS</span>
+            </div>
+        </div>
+        <button id="mobile-sidebar-toggle" class="text-white hover:text-teal-400 p-1.5 focus:outline-none transition-colors">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
 
     {{-- ===== SIDEBAR ===== --}}
-    <aside class="w-60 shrink-0 bg-slate-900 flex flex-col" style="position:sticky;top:0;height:100vh;">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-60 bg-slate-900 flex flex-col transform -translate-x-full md:translate-x-0 md:sticky md:top-0 md:h-screen transition-transform duration-300 ease-in-out">
 
-        {{-- Brand --}}
-        <div class="px-5 py-5 border-b border-white/5">
+        {{-- Brand (Desktop Only) --}}
+        <div class="hidden md:block px-5 py-5 border-b border-white/5">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
                     <img src="{{ asset('logo-web.jpg') }}" alt="STAIMAS" class="w-full h-full object-contain">
@@ -114,25 +130,28 @@
         </div>
     </aside>
 
+    {{-- Mobile Sidebar Overlay --}}
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden transition-opacity duration-300 ease-in-out md:hidden"></div>
+
     {{-- ===== MAIN CONTENT ===== --}}
     <div class="flex-grow flex flex-col min-w-0">
 
         {{-- Top Header Bar --}}
-        <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
+        <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 md:top-0 z-20">
             <div>
-                <h1 class="text-[15px] font-bold text-slate-900">@yield('title', 'Dashboard')</h1>
-                <p class="text-[11px] text-slate-400 font-medium mt-0.5">Portal UPT Studio & Lab STAIMAS Wonogiri</p>
+                <h1 class="text-[14px] md:text-[15px] font-bold text-slate-900">@yield('title', 'Dashboard')</h1>
+                <p class="hidden sm:block text-[11px] text-slate-400 font-medium mt-0.5">Portal UPT Studio & Lab STAIMAS Wonogiri</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="text-[11px] text-slate-500">
+                <span class="text-[10px] md:text-[11px] text-slate-500">
                     <i class="far fa-clock mr-1"></i>
-                    {{ now()->translatedFormat('l, d F Y') }}
+                    {{ now()->translatedFormat('d M Y') }}
                 </span>
             </div>
         </header>
 
         {{-- Page Content --}}
-        <main class="flex-grow p-8">
+        <main class="flex-grow p-4 md:p-8">
 
             {{-- Flash Messages --}}
             @if(session()->has('success'))
@@ -153,6 +172,26 @@
     </div>
 
 </div>
+
+{{-- Sidebar Mobile Toggle JS --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('mobile-sidebar-overlay');
+
+        if (toggleBtn && sidebar && overlay) {
+            function toggleSidebar() {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+                document.body.classList.toggle('overflow-hidden');
+            }
+
+            toggleBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+        }
+    });
+</script>
 
 </body>
 </html>
