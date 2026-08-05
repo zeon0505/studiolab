@@ -22,6 +22,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Akun Admin Yoga
+        $adminYoga = User::updateOrCreate(
+            ['email' => 'yoga@staimas.com'],
+            [
+                'name' => 'Yoga',
+                'no_wa' => '081234567899',
+                'password' => Hash::make('adminyoga'),
+            ]
+        );
+
         // 2. PJ / Staff Accounts
         $pj1 = User::updateOrCreate(
             ['email' => 'budi@staimas.com'],
