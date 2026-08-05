@@ -38,7 +38,7 @@
     </div>
 
     {{-- ===== SIDEBAR ===== --}}
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-60 bg-slate-900 flex flex-col transform -translate-x-full md:translate-x-0 md:sticky md:top-0 md:h-screen transition-transform duration-300 ease-in-out">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 w-60 bg-slate-900 flex flex-col transform -translate-x-full md:translate-x-0 md:sticky md:top-0 md:h-screen transition-transform duration-300 ease-in-out">
 
         {{-- Brand (Mobile Close Button Included) --}}
         <div class="px-5 py-5 border-b border-white/5 flex items-center justify-between">
@@ -135,7 +135,7 @@
     </aside>
 
     {{-- Mobile Sidebar Overlay --}}
-    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden transition-opacity duration-300 ease-in-out md:hidden"></div>
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300 ease-in-out md:hidden"></div>
 
     {{-- ===== MAIN CONTENT ===== --}}
     <div class="flex-grow flex flex-col min-w-0">
