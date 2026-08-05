@@ -40,8 +40,8 @@
     {{-- ===== SIDEBAR ===== --}}
     <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-60 bg-slate-900 flex flex-col transform -translate-x-full md:translate-x-0 md:sticky md:top-0 md:h-screen transition-transform duration-300 ease-in-out">
 
-        {{-- Brand (Desktop Only) --}}
-        <div class="hidden md:block px-5 py-5 border-b border-white/5">
+        {{-- Brand (Mobile Close Button Included) --}}
+        <div class="px-5 py-5 border-b border-white/5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
                     <img src="{{ asset('logo-web.jpg') }}" alt="STAIMAS" class="w-full h-full object-contain">
@@ -51,7 +51,11 @@
                     <span class="text-[10px] text-slate-400 font-medium">STAIMAS Wonogiri</span>
                 </div>
             </div>
+            <button id="mobile-sidebar-close" class="md:hidden text-slate-400 hover:text-white p-1 focus:outline-none transition-colors">
+                <i class="fas fa-times text-lg"></i>
+            </button>
         </div>
+
 
         {{-- Navigation --}}
         <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
@@ -177,18 +181,26 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+        const closeBtn = document.getElementById('mobile-sidebar-close');
         const sidebar = document.getElementById('admin-sidebar');
         const overlay = document.getElementById('mobile-sidebar-overlay');
 
-        if (toggleBtn && sidebar && overlay) {
-            function toggleSidebar() {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('hidden');
-                document.body.classList.toggle('overflow-hidden');
+        if (sidebar && overlay) {
+            function openSidebar() {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
             }
 
-            toggleBtn.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
         }
     });
 </script>
