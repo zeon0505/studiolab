@@ -1,2 +1,6 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /login
+
+Sitemap: https://gemastudio.staimaswonogiri.ac.id/sitemap.xml

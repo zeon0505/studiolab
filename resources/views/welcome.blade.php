@@ -12,9 +12,8 @@
                 UPT Studio & Lab STAIMAS Wonogiri
             </div>
             <h1 class="text-3xl sm:text-4xl font-bold leading-tight">
-                Pinjam Peralatan &<br>
-                <span class="text-teal-300">Ruangan Studio</span><br>
-                Secara Online
+                Gema Studio <br>
+                <span class="text-teal-300">Peminjaman Peralatan & Ruangan</span>
             </h1>
             <p class="text-[15px] text-teal-100 leading-relaxed max-w-lg">
                 Sistem peminjaman digital UPT STAIMAS Wonogiri. Ajukan peminjaman peralatan studio atau ruangan laboratorium kapan saja, pantau status persetujuan secara real-time.

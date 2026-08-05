@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Gema Studio') — UPT STAIMAS Wonogiri</title>
-    <meta name="description" content="Portal peminjaman Studio & Laboratorium UPT STAIMAS Wonogiri. Pinjam peralatan dan ruangan secara online.">
+    <title>@yield('title', 'Gema Studio') — Peminjaman Studio & Lab UPT STAIMAS Wonogiri</title>
+    <meta name="description" content="Gema Studio — Portal Layanan Peminjaman Peralatan & Ruangan Studio/Laboratorium secara Online di UPT STAIMAS Wonogiri.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

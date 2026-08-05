@@ -16,6 +16,37 @@ Route::get('/peminjaman/peralatan', [PageController::class, 'peminjamanPeralatan
 Route::get('/peminjaman/form/{item}', [PageController::class, 'peminjamanForm'])->name('pages.peminjaman.form');
 Route::get('/kalender', [PageController::class, 'kalender'])->name('pages.kalender');
 
+// Sitemap XML untuk Google Indexing
+Route::get('/sitemap.xml', function() {
+    $urls = [
+        '/',
+        '/peralatan',
+        '/alur',
+        '/struktur',
+        '/peminjaman/ruangan',
+        '/peminjaman/peralatan',
+        '/kalender'
+    ];
+    
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    
+    foreach ($urls as $url) {
+        $xml .= '<url>';
+        $xml .= '<loc>' . url($url) . '</loc>';
+        $xml .= '<lastmod>' . date('Y-m-d') . '</lastmod>';
+        $xml .= '<changefreq>weekly</changefreq>';
+        $xml .= '<priority>' . ($url === '/' ? '1.0' : '0.8') . '</priority>';
+        $xml .= '</url>';
+    }
+    
+    $xml .= '</urlset>';
+    
+    return response($xml, 200, [
+        'Content-Type' => 'application/xml'
+    ]);
+});
+
 // Autentikasi Pengguna (User & Admin Terpadu)
 Route::get('/login', [UserAuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [UserAuthController::class, 'login'])->name('login.post');
