@@ -143,33 +143,6 @@
     </div>
 </section>
 
-{{-- CTA SECTION --}}
-<section class="py-16 bg-slate-50 border-t border-slate-100">
-    <div class="max-w-2xl mx-auto px-4 text-center">
-        <h2 class="text-2xl font-bold text-slate-900 mb-3">Siap Mengajukan Peminjaman?</h2>
-        <p class="text-[13px] text-slate-500 mb-6">Login atau daftar akun untuk mulai mengajukan peminjaman secara online.</p>
-        <div class="flex flex-wrap justify-center gap-3">
-            @auth
-                <a href="{{ route('pages.peminjaman.ruangan') }}"
-                   class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3 rounded-xl text-[13px] transition-colors shadow-sm">
-                    <i class="fas fa-calendar-plus"></i> Ajukan Sekarang
-                </a>
-                <a href="{{ route('user.dashboard') }}"
-                   class="inline-flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-xl text-[13px] transition-colors">
-                    <i class="fas fa-desktop"></i> Dashboard Saya
-                </a>
-            <!-- @else
-                <a href="{{ route('register') }}"
-                   class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3 rounded-xl text-[13px] transition-colors shadow-sm">
-                    <i class="fas fa-user-plus"></i> Daftar Akun Gratis
-                </a>
-                <a href="{{ route('login') }}"
-                   class="inline-flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-xl text-[13px] transition-colors">
-                    <i class="fas fa-sign-in-alt"></i> Sudah Punya Akun
-                </a>
-            @endauth -->
-        </div>
-    </div>
-</section>
+
 
 @endsection
