@@ -158,7 +158,7 @@
                    class="inline-flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-xl text-[13px] transition-colors">
                     <i class="fas fa-desktop"></i> Dashboard Saya
                 </a>
-            @else
+            <!-- @else
                 <a href="{{ route('register') }}"
                    class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-3 rounded-xl text-[13px] transition-colors shadow-sm">
                     <i class="fas fa-user-plus"></i> Daftar Akun Gratis
@@ -167,7 +167,7 @@
                    class="inline-flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-xl text-[13px] transition-colors">
                     <i class="fas fa-sign-in-alt"></i> Sudah Punya Akun
                 </a>
-            @endauth
+            @endauth -->
         </div>
     </div>
 </section>
