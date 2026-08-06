@@ -90,11 +90,12 @@
                                         class="text-[12px] font-semibold text-teal-600 hover:text-teal-800 transition-colors">
                                         Edit
                                     </button>
-                                    <form action="{{ route('admin.items.destroy', $item->id) }}" method="POST"
-                                          onsubmit="return confirm('Hapus item ini?')">
+                                    <form id="delete-item-{{ $item->id }}" action="{{ route('admin.items.destroy', $item->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-[12px] font-semibold text-red-400 hover:text-red-700 transition-colors">Hapus</button>
+                                        <button type="button"
+                                            onclick="showConfirm('Hapus item &quot;{{ addslashes($item->nama) }}&quot;? Data yang sudah dihapus tidak dapat dikembalikan.', () => document.getElementById('delete-item-{{ $item->id }}').submit(), { title: 'Hapus Item', okLabel: 'Ya, Hapus' })"
+                                            class="text-[12px] font-semibold text-red-400 hover:text-red-700 transition-colors">Hapus</button>
                                     </form>
                                 </div>
                             </td>

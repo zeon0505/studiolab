@@ -196,14 +196,127 @@
         </main>
     </div>
 
+{{-- ===== CUSTOM CONFIRM MODAL (Global) ===== --}}
+<div id="custom-confirm-modal" class="fixed inset-0 z-[9999] items-center justify-center p-4" style="display:none">
+    {{-- Backdrop --}}
+    <div id="custom-confirm-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="confirmCancel()"></div>
+    {{-- Modal Box --}}
+    <div id="custom-confirm-box" class="relative bg-white rounded-3xl shadow-2xl shadow-slate-900/30 w-full max-w-sm transform transition-all duration-300 scale-90 opacity-0 overflow-hidden">
+        {{-- Top accent bar --}}
+        <div id="custom-confirm-accent" class="h-1.5 bg-gradient-to-r from-red-500 to-rose-400"></div>
+        <div class="px-7 pt-7 pb-6">
+            {{-- Icon --}}
+            <div class="flex items-center gap-4 mb-5">
+                <div id="custom-confirm-icon-wrap" class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-red-100">
+                    <i id="custom-confirm-icon" class="fas fa-trash-alt text-red-500 text-xl"></i>
+                </div>
+                <div>
+                    <p id="custom-confirm-title" class="font-extrabold text-slate-900 text-base leading-tight">Hapus Data</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Tindakan ini tidak dapat dibatalkan</p>
+                </div>
+            </div>
+            {{-- Message --}}
+            <p id="custom-confirm-message" class="text-sm text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3.5"></p>
+            {{-- Buttons --}}
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="confirmCancel()"
+                    class="flex-1 py-3 rounded-2xl font-bold text-sm border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                    Batal
+                </button>
+                <button type="button" id="custom-confirm-ok-btn" onclick="confirmOk()"
+                    class="flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
+                    <i class="fas fa-trash-alt text-xs"></i> Hapus
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
-{{-- Sidebar Mobile Toggle JS --}}
 <script>
-    // Penanganan fallback opsional jika overlay diklik langsung dari JS
+    // ===== Custom Confirm Modal =====
+    let _confirmCallback = null;
+
+    function showConfirm(message, callback, options = {}) {
+        const modal = document.getElementById('custom-confirm-modal');
+        const box   = document.getElementById('custom-confirm-box');
+        const msg   = document.getElementById('custom-confirm-message');
+        const title = document.getElementById('custom-confirm-title');
+        const okBtn = document.getElementById('custom-confirm-ok-btn');
+        const accent = document.getElementById('custom-confirm-accent');
+        const iconWrap = document.getElementById('custom-confirm-icon-wrap');
+        const icon  = document.getElementById('custom-confirm-icon');
+
+        // Apply options
+        const type = options.type || 'danger'; // 'danger' | 'warning' | 'info'
+        msg.textContent = message;
+        title.textContent = options.title || 'Konfirmasi Hapus';
+        okBtn.innerHTML = options.okLabel
+            ? `<i class="fas ${options.okIcon || 'fa-check'} text-xs"></i> ${options.okLabel}`
+            : '<i class="fas fa-trash-alt text-xs"></i> Hapus';
+
+        // Theme by type
+        if (type === 'warning') {
+            accent.className = 'h-1.5 bg-gradient-to-r from-amber-400 to-yellow-400';
+            iconWrap.className = 'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-amber-100';
+            icon.className = 'fas fa-exclamation-triangle text-amber-500 text-xl';
+            okBtn.className = 'flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-lg shadow-amber-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2';
+        } else if (type === 'info') {
+            accent.className = 'h-1.5 bg-gradient-to-r from-teal-500 to-cyan-500';
+            iconWrap.className = 'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-teal-100';
+            icon.className = 'fas fa-info-circle text-teal-600 text-xl';
+            okBtn.className = 'flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg shadow-teal-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2';
+        } else {
+            accent.className = 'h-1.5 bg-gradient-to-r from-red-500 to-rose-400';
+            iconWrap.className = 'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-red-100';
+            icon.className = 'fas fa-trash-alt text-red-500 text-xl';
+            okBtn.className = 'flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2';
+        }
+
+        _confirmCallback = callback;
+        modal.style.removeProperty('display');
+        modal.style.display = 'flex';
+        document.body.classList.add('overflow-hidden');
+
+        // Animate in
+        requestAnimationFrame(() => {
+            box.style.transform = 'scale(1)';
+            box.style.opacity = '1';
+        });
+    }
+
+    function confirmOk() {
+        _closeConfirmModal();
+        if (_confirmCallback) _confirmCallback();
+    }
+
+    function confirmCancel() {
+        _closeConfirmModal();
+    }
+
+    function _closeConfirmModal() {
+        const modal = document.getElementById('custom-confirm-modal');
+        const box   = document.getElementById('custom-confirm-box');
+        box.style.transform = 'scale(0.9)';
+        box.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.classList.remove('overflow-hidden');
+        }, 200);
+    }
+
+    // Helper: for form submits - attach to a form by id
+    function confirmForm(formId, message, options = {}) {
+        showConfirm(message, () => {
+            document.getElementById(formId).submit();
+        }, options);
+    }
+
+    // Fix sidebar active classes (remove stale class usage)
     function closeSidebar() {
-        document.getElementById('admin-sidebar').classList.remove('active');
-        document.getElementById('mobile-sidebar-overlay').classList.remove('active');
+        const s = document.getElementById('admin-sidebar');
+        const o = document.getElementById('mobile-sidebar-overlay');
+        if (s) { s.classList.add('-translate-x-full'); s.classList.remove('translate-x-0'); }
+        if (o) o.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
     }
 </script>

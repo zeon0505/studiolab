@@ -124,11 +124,13 @@
                                     <span class="text-[11px] text-amber-500 font-medium mr-2">⚠ No WA belum diisi</span>
                                 @endif
                                 
-                                <form action="{{ route('admin.assignments.destroy', $assignments[$day]->id) }}" method="POST"
-                                      onsubmit="return confirm('Hapus penugasan PJ untuk hari ini?')">
+                                <form id="delete-assignment-{{ $assignments[$day]->id }}" 
+                                      action="{{ route('admin.assignments.destroy', $assignments[$day]->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-bold transition-colors">
+                                    <button type="button"
+                                        onclick="showConfirm('Hapus penugasan PJ untuk hari {{ ucfirst($day) }}? Slot hari itu akan kembali kosong.', () => document.getElementById('delete-assignment-{{ $assignments[$day]->id }}').submit(), { title: 'Hapus Penugasan PJ', okLabel: 'Ya, Hapus' })"
+                                        class="text-red-500 hover:text-red-700 text-xs font-bold transition-colors">
                                         Hapus PJ
                                     </button>
                                 </form>
