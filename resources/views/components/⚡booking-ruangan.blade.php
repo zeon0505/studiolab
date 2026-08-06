@@ -40,6 +40,10 @@ new class extends Component
 
     public $conflictMessage = '';
 
+    // Keranjang Peralatan
+    public array $cart = []; // [item_id => jumlah]
+    public array $availableEquipment = [];
+
     // Bioskop mode
     public $listHari = [];
     public $modeJam = 'default';
@@ -150,6 +154,10 @@ new class extends Component
             $this->jumlah_kursi = 1;
         }
 
+        // Reset keranjang dan muat ulang peralatan sesuai kategori ruangan
+        $this->cart = [];
+        $this->loadEquipment();
+
         // Reset sesi ke yang pertama valid
         $hasValidSesi = false;
         foreach ($this->sesiJam as $key => $sesi) {
@@ -225,7 +233,48 @@ new class extends Component
         $this->maxKapasitasKursi = 0;
         $this->jumlah_kursi = 1;
         $this->conflictMessage = '';
+        $this->cart = [];
         $this->loadItems();
+        $this->loadEquipment();
+    }
+
+    public function loadEquipment()
+    {
+        $items = Item::where('kategori', $this->kategori)
+            ->where('tipe', 'peralatan')
+            ->where('stok', '>', 0)
+            ->where('status', 'tersedia')
+            ->get();
+
+        $this->availableEquipment = $items->map(fn($item) => [
+            'id'        => $item->id,
+            'nama'      => $item->nama,
+            'stok'      => $item->stok,
+            'deskripsi' => $item->deskripsi,
+            'gambar'    => $item->gambar,
+            'status'    => $item->status,
+        ])->toArray();
+    }
+
+    public function addToCart(int $id)
+    {
+        $item = collect($this->availableEquipment)->firstWhere('id', $id);
+        if (!$item) return;
+        $currentQty = $this->cart[$id] ?? 0;
+        if ($currentQty < $item['stok']) {
+            $this->cart[$id] = $currentQty + 1;
+        }
+    }
+
+    public function removeFromCart(int $id)
+    {
+        if (isset($this->cart[$id])) {
+            if ($this->cart[$id] > 1) {
+                $this->cart[$id]--;
+            } else {
+                unset($this->cart[$id]);
+            }
+        }
     }
 
     public function updatedJamMulai()
@@ -489,6 +538,18 @@ new class extends Component
             'jumlah'     => 1,
         ]);
 
+        // Simpan peralatan dari keranjang ke booking_items
+        foreach ($this->cart as $itemId => $jumlah) {
+            $peralatan = Item::find($itemId);
+            if ($peralatan && $jumlah > 0) {
+                BookingItem::create([
+                    'booking_id' => $booking->id,
+                    'item_id'    => $itemId,
+                    'jumlah'     => $jumlah,
+                ]);
+            }
+        }
+
         $selectedItemNama = Item::find($this->selected_item_id)?->nama ?? '';
         $selectedItemKategori = Item::find($this->selected_item_id)?->kategori ?? '';
         $selectedItemTipe = Item::find($this->selected_item_id)?->tipe ?? 'ruangan';
@@ -531,6 +592,8 @@ new class extends Component
         $this->maxKapasitasKursi = 0;
         $this->jumlah_kursi = 1;
         $this->sesiDipilih = '';
+        $this->cart = [];
+        $this->availableEquipment = [];
         $this->currentStep = 'sesi';
         $this->tanggal_peminjaman = count($this->listHari) > 0 ? $this->listHari[0]['date'] : Carbon::today()->format('Y-m-d');
         $this->autoRestoreCompletedRooms();
@@ -902,6 +965,91 @@ new class extends Component
     </div>
     @endif
 
+    {{-- ============================================================ --}}
+    {{-- KERANJANG PERALATAN (tampil setelah ruangan & jam dipilih) --}}
+    {{-- ============================================================ --}}
+    @if($currentStep === 'sesi' && $selected_item_id)
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6" wire:key="keranjang-peralatan">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center text-white text-xs font-black">
+                <i class="fas fa-box-open text-xs"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-bold text-gray-900 text-sm">Peralatan Tambahan (Opsional)</h4>
+                <p class="text-[10px] text-slate-400 mt-0.5">Tambahkan peralatan {{ $kategori === 'studio' ? 'studio' : 'laboratorium' }} yang Anda butuhkan</p>
+            </div>
+            @if(count($cart) > 0)
+                <span class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full">
+                    {{ array_sum($cart) }} item
+                </span>
+            @endif
+        </div>
+
+        @if(count($availableEquipment) === 0)
+            <div class="text-center py-8 text-slate-400">
+                <i class="fas fa-box-open text-3xl mb-2 opacity-30"></i>
+                <p class="text-xs">Tidak ada peralatan {{ $kategori === 'studio' ? 'studio' : 'laboratorium' }} tersedia saat ini.</p>
+            </div>
+        @else
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @foreach($availableEquipment as $eq)
+                    @php $jumlahDiKeranjang = $cart[$eq['id']] ?? 0; @endphp
+                    <div class="flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all
+                                {{ $jumlahDiKeranjang > 0 ? 'border-amber-400 bg-amber-50' : 'border-slate-100 bg-slate-50' }}">
+                        {{-- Icon/Gambar --}}
+                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                            @if($eq['gambar'])
+                                <img src="{{ asset('storage/' . $eq['gambar']) }}" alt="{{ $eq['nama'] }}" class="w-full h-full object-cover">
+                            @else
+                                <i class="fas fa-tools text-slate-400 text-sm"></i>
+                            @endif
+                        </div>
+                        {{-- Info --}}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-slate-900 leading-tight truncate">{{ $eq['nama'] }}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Stok: {{ $eq['stok'] }}</p>
+                        </div>
+                        {{-- Counter --}}
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            @if($jumlahDiKeranjang > 0)
+                                <button type="button" wire:click="removeFromCart({{ $eq['id'] }})"
+                                    class="w-7 h-7 rounded-lg bg-white border border-amber-300 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition-colors">
+                                    <i class="fas fa-minus text-[9px]"></i>
+                                </button>
+                                <span class="w-6 text-center text-xs font-black text-amber-700">{{ $jumlahDiKeranjang }}</span>
+                            @endif
+                            <button type="button" wire:click="addToCart({{ $eq['id'] }})"
+                                @if($jumlahDiKeranjang >= $eq['stok']) disabled @endif
+                                class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors
+                                       {{ $jumlahDiKeranjang >= $eq['stok'] ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white' }}">
+                                <i class="fas fa-plus text-[9px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Ringkasan Keranjang --}}
+            @if(count($cart) > 0)
+                <div class="mt-4 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl">
+                    <p class="text-[10px] font-black text-amber-700 uppercase tracking-wider mb-2">Peralatan Dipilih:</p>
+                    <div class="space-y-1">
+                        @foreach($cart as $itemId => $jumlah)
+                            @php $eq = collect($availableEquipment)->firstWhere('id', $itemId); @endphp
+                            @if($eq)
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-700 font-medium">{{ $eq['nama'] }}</span>
+                                    <span class="font-bold text-amber-700 bg-white border border-amber-200 px-2 py-0.5 rounded-lg">{{ $jumlah }}x</span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        @endif
+    </div>
+    @endif
+
     {{-- TOMBOL LANJUT (di bawah step sesi) --}}
     @if($currentStep === 'sesi' && $selected_item_id && ($sesiDipilih || ($modeJam === 'custom' && $jam_mulai && $jam_selesai)))
     <button type="button" wire:click="lanjutKeForm"
@@ -1075,6 +1223,39 @@ new class extends Component
                     @endif
                 </div>
             </div>
+
+            {{-- Peralatan Tambahan di Review --}}
+            @if(count($cart) > 0)
+            <div class="flex items-start gap-4 py-3.5 border-t border-slate-50">
+                <div class="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-box-open text-amber-500 text-xs"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Peralatan Tambahan</p>
+                    <div class="mt-1.5 space-y-1">
+                        @foreach($cart as $itemId => $jumlah)
+                            @php $eq = collect($availableEquipment)->firstWhere('id', $itemId); @endphp
+                            @if($eq)
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-700 font-medium">{{ $eq['nama'] }}</span>
+                                    <span class="font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg">{{ $jumlah }}x</span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @else
+            <div class="flex items-start gap-4 py-3.5 border-t border-slate-50">
+                <div class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-box-open text-slate-300 text-xs"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Peralatan Tambahan</p>
+                    <p class="text-xs text-slate-400 mt-0.5 italic">Tidak ada peralatan tambahan</p>
+                </div>
+            </div>
+            @endif
         </div>
 
         <div class="px-6 pb-6 flex gap-3">
