@@ -4,6 +4,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Item;
 use App\Models\Booking;
+use App\Models\BookingItem;
 use App\Models\DailyAssignment;
 use App\Services\WhatsAppService;
 use Carbon\Carbon;
@@ -244,7 +245,7 @@ new class extends Component
         $currentTime = $now->format('H:i:s');
 
         Booking::where('status', 'disetujui')
-            ->whereHas('item', fn($q) => $q->where('tipe', 'ruangan')->where('status', 'dipinjam'))
+            ->whereHas('items', fn($q) => $q->where('tipe', 'ruangan')->where('status', 'dipinjam'))
             ->where(function($q) use ($today, $currentTime) {
                 $q->where('tanggal_peminjaman', '<', $today)
                 ->orWhere(function($q2) use ($today, $currentTime) {
@@ -253,7 +254,9 @@ new class extends Component
                 });
             })
             ->each(function($booking) {
-                $booking->item->update(['status' => 'tersedia']);
+                foreach ($booking->items as $itm) {
+                    $itm->update(['status' => 'tersedia']);
+                }
                 $booking->update(['status' => 'selesai']);
             });
     }
@@ -476,8 +479,20 @@ new class extends Component
             'catatan' => $this->catatan,
         ]);
 
-        $booking->load('item', 'penanggungJawab');
+        $booking->load('items', 'penanggungJawab');
         $whatsapp = app(WhatsAppService::class);
+
+        // Create booking_items record for ruangan
+        BookingItem::create([
+            'booking_id' => $booking->id,
+            'item_id'    => $this->selected_item_id,
+            'jumlah'     => 1,
+        ]);
+
+        $selectedItemNama = Item::find($this->selected_item_id)?->nama ?? '';
+        $selectedItemKategori = Item::find($this->selected_item_id)?->kategori ?? '';
+        $selectedItemTipe = Item::find($this->selected_item_id)?->tipe ?? 'ruangan';
+
         $whatsapp->notifyPj([
             'booking_id' => $booking->id,
             'pj_name' => $booking->penanggungJawab?->name ?? 'PJ Bertugas',
@@ -485,9 +500,9 @@ new class extends Component
             'nama_peminjam' => $this->nama_peminjam,
             'instansi_peminjam' => $this->instansi_peminjam,
             'no_wa' => $this->no_wa,
-            'nama_item' => $booking->item->nama,
-            'kategori_item' => $booking->item->kategori,
-            'tipe_item' => $booking->item->tipe,
+            'nama_item' => $selectedItemNama,
+            'kategori_item' => $selectedItemKategori,
+            'tipe_item' => $selectedItemTipe,
             'tanggal_peminjaman' => Carbon::parse($this->tanggal_peminjaman)->translatedFormat('l, d F Y'),
             'tanggal_pengembalian' => Carbon::parse($this->tanggal_peminjaman)->translatedFormat('d F Y'),
             'jam_mulai' => $this->jam_mulai,
@@ -499,9 +514,9 @@ new class extends Component
             'booking_id' => $booking->id,
             'nama_peminjam' => $this->nama_peminjam,
             'no_wa' => $this->no_wa,
-            'nama_item' => $booking->item->nama,
-            'kategori_item' => $booking->item->kategori,
-            'tipe_item' => $booking->item->tipe,
+            'nama_item' => $selectedItemNama,
+            'kategori_item' => $selectedItemKategori,
+            'tipe_item' => $selectedItemTipe,
             'tanggal_peminjaman' => Carbon::parse($this->tanggal_peminjaman)->translatedFormat('l, d F Y'),
             'tanggal_pengembalian' => Carbon::parse($this->tanggal_peminjaman)->translatedFormat('d F Y'),
             'jam_mulai' => $this->jam_mulai,
@@ -526,7 +541,7 @@ new class extends Component
             'id'      => $booking->id,
             'kode'    => 'BKG-' . str_pad($booking->id, 4, '0', STR_PAD_LEFT),
             'nama'    => $booking->nama_peminjam,
-            'item'    => $booking->item->nama,
+            'item'    => $selectedItemNama,
             'tanggal' => Carbon::parse($booking->tanggal_peminjaman)->translatedFormat('d F Y'),
             'jam'     => $this->jam_mulai && $this->jam_selesai
                          ? substr($this->jam_mulai, 0, 5) . ' – ' . substr($this->jam_selesai, 0, 5) . ' WIB'

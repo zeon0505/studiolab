@@ -52,11 +52,11 @@ class AdminController extends Controller
 
     public function dashboard(Request $request)
     {
-        $query = Booking::with('item', 'penanggungJawab');
+        $query = Booking::with('items', 'penanggungJawab');
 
         // Filter Tipe (Peralatan vs Ruangan)
         if ($request->filled('tipe')) {
-            $query->whereHas('item', function ($q) use ($request) {
+            $query->whereHas('items', function ($q) use ($request) {
                 $q->where('tipe', $request->tipe);
             });
         }
@@ -88,8 +88,8 @@ class AdminController extends Controller
         }
 
         // --- DATA CHART 2: Rasio Ruangan vs Peralatan ---
-        $countRuangan = Booking::whereHas('item', fn($q) => $q->where('tipe', 'ruangan'))->count();
-        $countPeralatan = Booking::whereHas('item', fn($q) => $q->where('tipe', 'peralatan'))->count();
+        $countRuangan = Booking::whereHas('items', fn($q) => $q->where('tipe', 'ruangan'))->count();
+        $countPeralatan = Booking::whereHas('items', fn($q) => $q->where('tipe', 'peralatan'))->count();
 
         return view('admin.dashboard', compact(
             'bookings', 
@@ -104,7 +104,7 @@ class AdminController extends Controller
 
     public function history(Request $request)
     {
-        $query = Booking::with('item', 'penanggungJawab')
+        $query = Booking::with('items', 'penanggungJawab')
             ->whereIn('status', ['selesai', 'ditolak']);
 
         // Filter Pencarian Nama / Instansi / Nama Item
@@ -113,7 +113,7 @@ class AdminController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('nama_peminjam', 'like', '%' . $search . '%')
                   ->orWhere('instansi_peminjam', 'like', '%' . $search . '%')
-                  ->orWhereHas('item', function($qi) use ($search) {
+                  ->orWhereHas('items', function($qi) use ($search) {
                       $qi->where('nama', 'like', '%' . $search . '%');
                   });
             });
@@ -121,7 +121,7 @@ class AdminController extends Controller
 
         // Filter Tipe (Ruangan vs Peralatan)
         if ($request->filled('tipe')) {
-            $query->whereHas('item', function($q) use ($request) {
+            $query->whereHas('items', function($q) use ($request) {
                 $q->where('tipe', $request->tipe);
             });
         }
@@ -133,11 +133,11 @@ class AdminController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $query = Booking::with('item', 'penanggungJawab');
+        $query = Booking::with('items', 'penanggungJawab');
 
         // Filter Tipe
         if ($request->filled('tipe')) {
-            $query->whereHas('item', function ($q) use ($request) {
+            $query->whereHas('items', function ($q) use ($request) {
                 $q->where('tipe', $request->tipe);
             });
         }
@@ -187,7 +187,7 @@ class AdminController extends Controller
 
     public function bookingShow(Booking $booking)
     {
-        $booking->load('item', 'penanggungJawab');
+        $booking->load('items', 'penanggungJawab');
         return view('admin.booking_detail', compact('booking'));
     }
 
@@ -203,22 +203,26 @@ class AdminController extends Controller
             'catatan' => $request->catatan,
         ]);
 
-        // If returned / selesai or rejected, change item status back to tersedia
+        // If returned / selesai or rejected, change item status/stock back
         if (in_array($request->status, ['selesai', 'ditolak'])) {
-            $item = $booking->item;
-            if ($item->tipe === 'ruangan') {
-                $item->update(['status' => 'tersedia']);
+            foreach ($booking->items as $item) {
+                if ($item->tipe === 'ruangan') {
+                    $item->update(['status' => 'tersedia']);
+                } else {
+                    $item->increment('stok', $item->pivot->jumlah);
+                }
             }
         }
 
         // Kirim notifikasi status update ke peminjam via WhatsApp
-        $booking->load('item');
+        $booking->load('items');
+        $namaItem = $booking->items->pluck('nama')->implode(', ');
         $whatsapp = app(WhatsAppService::class);
         $whatsapp->notifyStatusUpdate([
             'booking_id'         => $booking->id,
             'nama_peminjam'      => $booking->nama_peminjam,
             'no_wa'              => $booking->no_wa,
-            'nama_item'          => $booking->item->nama,
+            'nama_item'          => $namaItem,
             'tanggal_peminjaman' => Carbon::parse($booking->tanggal_peminjaman)->translatedFormat('l, d F Y'),
             'tanggal_pengembalian' => $booking->tanggal_pengembalian
                 ? Carbon::parse($booking->tanggal_pengembalian)->translatedFormat('d F Y')

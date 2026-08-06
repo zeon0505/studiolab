@@ -31,9 +31,14 @@ class Booking extends Model
         'tanggal_pengembalian' => 'date',
     ];
 
-    public function item()
+    public function items()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsToMany(Item::class, 'booking_items')->withPivot('jumlah')->withTimestamps();
+    }
+
+    public function bookingItems()
+    {
+        return $this->hasMany(BookingItem::class);
     }
 
     public function user()

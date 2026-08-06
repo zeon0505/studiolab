@@ -127,8 +127,13 @@
                         <span style="color: #047857; font-size: 9px;">WA: {{ $booking->no_wa ?: '-' }}</span>
                     </td>
                     <td>
-                        <strong>{{ $booking->item->nama }}</strong><br>
-                        <span style="color: #6b7280; font-size: 9px; text-transform: uppercase;">{{ $booking->item->kategori }} &bull; {{ $booking->item->tipe }}</span>
+                        @foreach($booking->items as $itm)
+                            <strong>{{ $itm->nama }}</strong>{{ $itm->pivot->jumlah > 1 ? ' ('.$itm->pivot->jumlah.'x)' : '' }}<br>
+                            <span style="color: #6b7280; font-size: 9px; text-transform: uppercase;">{{ $itm->kategori }} &bull; {{ $itm->tipe }}</span><br>
+                        @endforeach
+                        @if($booking->items->count() === 0)
+                            <span style="color: #9ca3af; font-size: 9px;">-</span>
+                        @endif
                     </td>
                     <td>
                         {{ $booking->tanggal_peminjaman->format('d M Y') }}

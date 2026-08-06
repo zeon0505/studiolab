@@ -24,7 +24,7 @@
     {{-- Main Detail Card --}}
     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-6">
         @php
-            $isRuangan = $booking->item->tipe === 'ruangan';
+            $isRuangan = $booking->items->where('tipe', 'ruangan')->count() > 0;
             $statusColors = [
                 'pending'   => 'bg-amber-50 text-amber-800 border-amber-200',
                 'disetujui' => 'bg-emerald-50 text-emerald-800 border-emerald-200',
@@ -44,18 +44,31 @@
 
         {{-- Details --}}
         <div class="p-6 divide-y divide-slate-50 space-y-0">
-            {{-- Item --}}
+            {{-- Items (multi-item) --}}
             <div class="flex items-start gap-4 py-3.5">
                 <div class="w-10 h-10 rounded-2xl {{ $isRuangan ? 'bg-blue-50 text-blue-600' : 'bg-teal-50 text-teal-600' }} flex items-center justify-center shrink-0">
-                    <i class="{{ $isRuangan ? 'fas fa-door-open' : 'fas fa-tools' }} text-base"></i>
+                    <i class="{{ $isRuangan ? 'fas fa-door-open' : 'fas fa-shopping-basket' }} text-base"></i>
                 </div>
-                <div>
+                <div class="flex-1">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Item Dipinjam</p>
-                    <p class="text-sm font-bold text-slate-900 mt-0.5">{{ $booking->item->nama }}</p>
-                    <div class="flex items-center gap-1.5 mt-1">
-                        <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 text-slate-500 uppercase">{{ $booking->item->tipe }}</span>
-                        <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-teal-50 text-teal-700 uppercase">{{ $booking->item->kategori }}</span>
-                    </div>
+                    @if($booking->items->count() > 0)
+                        <div class="mt-1 space-y-1.5">
+                            @foreach($booking->items as $itm)
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-slate-900">{{ $itm->nama }}</span>
+                                <div class="flex items-center gap-1.5 ml-2 shrink-0">
+                                    @if($itm->pivot->jumlah > 1)
+                                    <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">{{ $itm->pivot->jumlah }}x</span>
+                                    @endif
+                                    <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 text-slate-500 uppercase">{{ $itm->tipe }}</span>
+                                    <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-teal-50 text-teal-700 uppercase">{{ $itm->kategori }}</span>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-slate-400 mt-0.5 italic">Lihat detail peminjaman ruangan</p>
+                    @endif
                 </div>
             </div>
 

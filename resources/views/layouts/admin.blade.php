@@ -19,14 +19,29 @@
         /* Mobile Sidebar Custom CSS */
         @media (max-width: 767px) {
             #admin-sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
+                position: fixed !important;
+                transform: translateX(-100%) !important;
+                z-index: 50 !important;
+                height: 100vh !important;
             }
             #admin-sidebar.active {
-                transform: translateX(0);
+                transform: translateX(0) !important;
             }
             #mobile-sidebar-overlay.active {
                 display: block !important;
+            }
+        }
+        
+        /* Desktop Sidebar Reset */
+        @media (min-width: 768px) {
+            #admin-sidebar {
+                position: sticky !important;
+                transform: translateX(0) !important;
+                z-index: 40 !important;
+                display: flex !important;
+            }
+            #mobile-sidebar-overlay {
+                display: none !important;
             }
         }
     </style>

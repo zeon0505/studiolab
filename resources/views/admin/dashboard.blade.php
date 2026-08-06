@@ -133,14 +133,31 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <p class="text-[13px] font-semibold text-slate-800">{{ $booking->item->nama }}</p>
-                                <div class="flex items-center gap-1.5 mt-1">
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-100 uppercase">{{ $booking->item->kategori }}</span>
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 uppercase">{{ $booking->item->tipe }}</span>
-                                    @if($booking->jumlah_kursi > 0)
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fas fa-chair text-[8px] mr-0.5"></i> {{ $booking->jumlah_kursi }} Kursi</span>
+                                @php $firstItem = $booking->items->first(); @endphp
+                                @if($booking->items->count() > 0)
+                                    <div class="space-y-0.5">
+                                        @foreach($booking->items as $itm)
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-[12px] font-semibold text-slate-800 truncate">{{ $itm->nama }}</span>
+                                            @if($itm->pivot->jumlah > 1)
+                                            <span class="text-[9px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded-md shrink-0">{{ $itm->pivot->jumlah }}x</span>
+                                            @endif
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    @if($firstItem)
+                                    <div class="flex items-center gap-1.5 mt-1">
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-100 uppercase">{{ $firstItem->kategori }}</span>
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 uppercase">{{ $firstItem->tipe }}</span>
+                                    </div>
                                     @endif
-                                </div>
+                                @else
+                                    {{-- Ruangan booking (from booking-ruangan component) --}}
+                                    <p class="text-[12px] text-slate-400 italic">Lihat detail</p>
+                                @endif
+                                @if($booking->jumlah_kursi > 0)
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 inline-flex items-center gap-0.5 mt-1"><i class="fas fa-chair text-[8px] mr-0.5"></i> {{ $booking->jumlah_kursi }} Kursi</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <p class="text-[13px] font-medium text-slate-700">{{ $booking->tanggal_peminjaman->format('d M Y') }}</p>
@@ -189,7 +206,7 @@
                                             data-id="{{ $booking->id }}"
                                             data-nama="{{ $booking->nama_peminjam }}"
                                             data-instansi="{{ $booking->instansi_peminjam }}"
-                                            data-item="{{ $booking->item->nama }}"
+                                            data-item="{{ $booking->items->pluck('nama')->implode(', ') }}"
                                             data-waktu="{{ $booking->tanggal_peminjaman->format('d M Y') }} @if($booking->jam_mulai)({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@endif"
                                             data-bukti="{{ asset('storage/' . $booking->bukti_peminjam) }}"
                                             data-wa="{{ $booking->no_wa }}"
@@ -212,7 +229,7 @@
                                         data-id="{{ $booking->id }}"
                                         data-nama="{{ $booking->nama_peminjam }}"
                                         data-instansi="{{ $booking->instansi_peminjam }}"
-                                        data-item="{{ $booking->item->nama }}"
+                                        data-item="{{ $booking->items->pluck('nama')->implode(', ') }}"
                                         data-waktu="{{ $booking->tanggal_peminjaman->format('d M Y') }} @if($booking->jam_mulai)({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@endif"
                                         data-bukti="{{ asset('storage/' . $booking->bukti_peminjam) }}"
                                         data-wa="{{ $booking->no_wa }}"

@@ -4,6 +4,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Item;
 use App\Models\Booking;
+use App\Models\BookingItem;
 use App\Models\DailyAssignment;
 use App\Services\WhatsAppService;
 use Carbon\Carbon;
@@ -188,7 +189,18 @@ new class extends Component
         ]);
 
         // Kirim notifikasi WhatsApp ke PJ bertugas
-        $booking->load('item', 'penanggungJawab');
+        $booking->load('items', 'penanggungJawab');
+        $selectedItem = Item::find($this->selected_item_id);
+
+        // Create booking_items record
+        if ($selectedItem) {
+            BookingItem::create([
+                'booking_id' => $booking->id,
+                'item_id'    => $selectedItem->id,
+                'jumlah'     => 1,
+            ]);
+        }
+
         $whatsapp = app(WhatsAppService::class);
         $whatsapp->notifyPj([
             'booking_id' => $booking->id,
@@ -197,9 +209,9 @@ new class extends Component
             'nama_peminjam' => $this->nama_peminjam,
             'instansi_peminjam' => $this->instansi_peminjam,
             'no_wa' => $this->no_wa,
-            'nama_item' => $booking->item->nama,
-            'kategori_item' => $booking->item->kategori,
-            'tipe_item' => $booking->item->tipe,
+            'nama_item' => $selectedItem?->nama ?? '',
+            'kategori_item' => $selectedItem?->kategori ?? '',
+            'tipe_item' => $selectedItem?->tipe ?? '',
             'tanggal_peminjaman' => Carbon::parse($this->tanggal_peminjaman)->translatedFormat('l, d F Y'),
             'tanggal_pengembalian' => Carbon::parse($this->tanggal_pengembalian)->translatedFormat('d F Y'),
             'jam_mulai' => $this->mode === 'ruangan' ? $this->jam_mulai : null,

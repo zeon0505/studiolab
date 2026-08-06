@@ -4,6 +4,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Item;
 use App\Models\Booking;
+use App\Models\BookingItem;
 use App\Models\DailyAssignment;
 use App\Services\WhatsAppService;
 use Carbon\Carbon;
@@ -23,6 +24,9 @@ new class extends Component
     public ?string $catatan = null;
 
     public string $kategori = 'studio';
+    // Cart: array of [item_id => jumlah]
+    public array $cart = [];
+    // Kept for backward compatibility when pre-selecting an item
     public string $selected_item_id = '';
     public ?array $selectedItemData = null;
 
@@ -44,12 +48,13 @@ new class extends Component
         $this->loadItems();
         $this->checkPjAssignment();
 
-        // Pre-select item jika dikirim dari halaman form
+        // Pre-select item jika dikirim dari halaman form, tambahkan ke cart
         if ($selected_item_id) {
-            $this->selected_item_id = $selected_item_id;
             $item = Item::find($selected_item_id);
             if ($item) {
                 $this->kategori = $item->kategori;
+                $this->cart = [$selected_item_id => 1];
+                $this->selected_item_id = (string)$selected_item_id;
                 $this->selectedItemData = $item->toArray();
                 $this->loadItems();
             }
@@ -91,6 +96,10 @@ new class extends Component
 
     public function lanjutKeForm()
     {
+        if (empty($this->cart)) {
+            $this->addError('cart', 'Silakan pilih minimal satu peralatan.');
+            return;
+        }
         $this->currentStep = 'form';
     }
 
@@ -106,11 +115,13 @@ new class extends Component
             'instansi_peminjam' => 'required|string|max:255',
             'no_wa'             => 'required|string|regex:/^[0-9\-\+\s]+$/|min:9|max:20',
             'bukti_peminjam'    => 'required|image|max:2048',
-            'selected_item_id'  => 'required',
         ], [
-            'selected_item_id.required' => 'Silakan pilih peralatan yang ingin dipinjam.',
             'bukti_peminjam.required'   => 'Silakan unggah foto KTM/KTP sebagai bukti identitas.',
         ]);
+        if (empty($this->cart)) {
+            $this->addError('cart', 'Silakan pilih minimal satu peralatan.');
+            return;
+        }
         $this->currentStep = 'review';
     }
 
@@ -121,8 +132,6 @@ new class extends Component
 
     public function updatedKategori()
     {
-        $this->selected_item_id = '';
-        $this->selectedItemData = null;
         $this->loadItems();
     }
 
@@ -131,18 +140,68 @@ new class extends Component
         $this->checkPjAssignment();
     }
 
+    public function addToCart(int $id)
+    {
+        $item = collect($this->availableItems)->firstWhere('id', $id);
+        if (!$item) return;
+
+        $currentQty = $this->cart[$id] ?? 0;
+        $maxStok = $item['stok'];
+
+        if ($currentQty < $maxStok) {
+            $this->cart[$id] = $currentQty + 1;
+        }
+    }
+
+    public function removeFromCart(int $id)
+    {
+        if (isset($this->cart[$id])) {
+            if ($this->cart[$id] > 1) {
+                $this->cart[$id]--;
+            } else {
+                unset($this->cart[$id]);
+            }
+        }
+    }
+
+    // Backward-compat: single selectItem (for pre-selected from catalog)
     public function selectItem(int $id)
     {
-        $this->selected_item_id = $id;
-        $item = collect($this->availableItems)->firstWhere('id', $id);
-        $this->selectedItemData = $item ? (array)$item : null;
+        $this->addToCart($id);
+    }
+
+    public function getCartItemsProperty()
+    {
+        $items = [];
+        foreach ($this->cart as $itemId => $jumlah) {
+            $found = collect($this->availableItems)->firstWhere('id', $itemId);
+            if ($found) {
+                $found['jumlah'] = $jumlah;
+                $items[] = $found;
+            } else {
+                // Try to fetch from DB in case item not in availableItems (different kategori)
+                $dbItem = Item::find($itemId);
+                if ($dbItem) {
+                    $items[] = [
+                        'id' => $dbItem->id,
+                        'nama' => $dbItem->nama,
+                        'stok' => $dbItem->stok,
+                        'deskripsi' => $dbItem->deskripsi,
+                        'gambar' => $dbItem->gambar,
+                        'status' => $dbItem->status,
+                        'jumlah' => $jumlah,
+                    ];
+                }
+            }
+        }
+        return $items;
     }
 
     public function loadItems()
     {
         $items = Item::where('kategori', $this->kategori)
             ->where('tipe', 'peralatan')
-            ->where('status', 'tersedia')
+            ->where('stok', '>', 0)
             ->get();
 
         $this->availableItems = $items->map(fn($item) => [
@@ -153,14 +212,6 @@ new class extends Component
             'gambar'   => $item->gambar,
             'status'   => $item->status,
         ])->toArray();
-
-        if ($this->selected_item_id) {
-            $found = collect($this->availableItems)->firstWhere('id', $this->selected_item_id);
-            if (!$found) {
-                $this->selected_item_id = '';
-                $this->selectedItemData = null;
-            }
-        }
     }
 
     public function checkPjAssignment()
@@ -194,13 +245,17 @@ new class extends Component
             'nama_peminjam'       => 'required|string|max:255',
             'instansi_peminjam'   => 'required|string|max:255',
             'no_wa'               => 'required|string|regex:/^[0-9\-\+\s]+$/|min:9|max:20',
-            'selected_item_id'    => 'required',
             'tanggal_peminjaman'  => 'required|date',
             'tanggal_pengembalian'=> 'required|date|after_or_equal:tanggal_peminjaman',
         ], [
-            'selected_item_id.required'          => 'Silakan pilih peralatan yang ingin dipinjam.',
             'tanggal_pengembalian.after_or_equal' => 'Tanggal pengembalian tidak boleh sebelum tanggal peminjaman.',
         ]);
+
+        if (empty($this->cart)) {
+            session()->flash('error', 'Silakan pilih minimal satu peralatan.');
+            $this->currentStep = 'tanggal';
+            return;
+        }
 
         // Pastikan file bukti masih ada
         if (!$this->bukti_peminjam) {
@@ -214,29 +269,22 @@ new class extends Component
             return;
         }
 
-        // Real-time Stock validation guard (mencegah double booking/race condition)
-        $item = Item::find($this->selected_item_id);
-        if (!$item || $item->status !== 'tersedia' || $item->stok < 1) {
-            session()->flash('error', 'Maaf, peralatan yang Anda pilih baru saja dipinjam atau tidak lagi tersedia. Silakan pilih peralatan lain.');
-            $this->loadItems();
-            $this->currentStep = 'tanggal';
-            return;
+        // Validasi stok semua item di cart
+        foreach ($this->cart as $itemId => $jumlah) {
+            $item = Item::find($itemId);
+            if (!$item || $item->stok < $jumlah) {
+                session()->flash('error', 'Maaf, stok peralatan "' . ($item->nama ?? 'Unknown') . '" tidak mencukupi. Silakan sesuaikan jumlah atau pilih peralatan lain.');
+                $this->loadItems();
+                $this->currentStep = 'tanggal';
+                return;
+            }
         }
 
         $path = $this->bukti_peminjam->store('proofs', 'public');
 
-        // Kurangi stok atau update status peralatan jika perlu
-        if ($item->stok <= 1) {
-            $item->update([
-                'stok' => 0,
-                'status' => 'dipinjam'
-            ]);
-        } else {
-            $item->decrement('stok');
-        }
-
+        // Buat 1 booking induk (tanpa item_id, karena multi-item)
         $booking = Booking::create([
-            'item_id'              => $this->selected_item_id,
+            'item_id'              => null,
             'user_id'              => Auth::id(),
             'penanggung_jawab_id'  => $this->currentPjId,
             'nama_peminjam'        => $this->nama_peminjam,
@@ -252,7 +300,30 @@ new class extends Component
             'catatan'              => $this->catatan,
         ]);
 
-        $booking->load('item', 'penanggungJawab');
+        // Simpan tiap item ke tabel booking_items & kurangi stok
+        $namaItemList = [];
+        foreach ($this->cart as $itemId => $jumlah) {
+            $item = Item::find($itemId);
+            if (!$item) continue;
+
+            BookingItem::create([
+                'booking_id' => $booking->id,
+                'item_id'    => $itemId,
+                'jumlah'     => $jumlah,
+            ]);
+
+            $newStok = $item->stok - $jumlah;
+            $item->update([
+                'stok'   => max(0, $newStok),
+                'status' => $newStok <= 0 ? 'dipinjam' : 'tersedia',
+            ]);
+
+            $namaItemList[] = ($jumlah > 1 ? $jumlah . 'x ' : '') . $item->nama;
+        }
+
+        $namaItemString = implode(', ', $namaItemList);
+
+        $booking->load('items', 'penanggungJawab');
         $whatsapp = app(WhatsAppService::class);
 
         $whatsapp->notifyPj([
@@ -262,9 +333,9 @@ new class extends Component
             'nama_peminjam'      => $this->nama_peminjam,
             'instansi_peminjam'  => $this->instansi_peminjam,
             'no_wa'              => $this->no_wa,
-            'nama_item'          => $booking->item->nama,
-            'kategori_item'      => $booking->item->kategori,
-            'tipe_item'          => $booking->item->tipe,
+            'nama_item'          => $namaItemString,
+            'kategori_item'      => 'peralatan',
+            'tipe_item'          => 'peralatan',
             'tanggal_peminjaman' => Carbon::parse($this->tanggal_peminjaman)->translatedFormat('l, d F Y'),
             'tanggal_pengembalian' => Carbon::parse($this->tanggal_pengembalian)->translatedFormat('d F Y'),
             'jam_mulai'          => null,
@@ -276,9 +347,9 @@ new class extends Component
             'booking_id'         => $booking->id,
             'nama_peminjam'      => $this->nama_peminjam,
             'no_wa'              => $this->no_wa,
-            'nama_item'          => $booking->item->nama,
-            'kategori_item'      => $booking->item->kategori,
-            'tipe_item'          => $booking->item->tipe,
+            'nama_item'          => $namaItemString,
+            'kategori_item'      => 'peralatan',
+            'tipe_item'          => 'peralatan',
             'tanggal_peminjaman' => Carbon::parse($this->tanggal_peminjaman)->translatedFormat('l, d F Y'),
             'tanggal_pengembalian' => Carbon::parse($this->tanggal_pengembalian)->translatedFormat('d F Y'),
             'jam_mulai'          => null,
@@ -287,6 +358,7 @@ new class extends Component
         ]);
 
         $this->reset(['nama_peminjam','instansi_peminjam','no_wa','bukti_peminjam','catatan']);
+        $this->cart = [];
         $this->selected_item_id  = '';
         $this->selectedItemData  = null;
         $this->tanggal_peminjaman  = count($this->listHari) > 0 ? $this->listHari[0]['date'] : Carbon::today()->format('Y-m-d');
@@ -299,7 +371,7 @@ new class extends Component
             'id'        => $booking->id,
             'kode'      => 'BKG-' . str_pad($booking->id, 4, '0', STR_PAD_LEFT),
             'nama'      => $booking->nama_peminjam,
-            'item'      => $booking->item->nama,
+            'item'      => $namaItemString,
             'tanggal'   => Carbon::parse($booking->tanggal_peminjaman)->translatedFormat('d F Y'),
             'kembali'   => Carbon::parse($booking->tanggal_pengembalian)->translatedFormat('d F Y'),
         ]);
@@ -470,11 +542,10 @@ new class extends Component
             </div>
         </div>
 
-        {{-- Pilih Peralatan (jika belum pre-select) --}}
-        @if(!$selectedItemData)
+        {{-- Pilih Peralatan - Keranjang multi-item --}}
         <div class="mt-5 border-t border-slate-100 pt-5">
             <h5 class="font-bold text-gray-900 text-sm mb-3 flex items-center gap-2">
-                <i class="fas fa-tools text-teal-600"></i> Pilih Peralatan
+                <i class="fas fa-shopping-basket text-teal-600"></i> Pilih Peralatan (Keranjang)
             </h5>
             <div class="flex gap-2 mb-4">
                 <button type="button" wire:click="$set('kategori', 'studio')"
@@ -497,62 +568,75 @@ new class extends Component
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     @foreach($availableItems as $itm)
                         @php
-                            $isSel = $selected_item_id == $itm['id'];
+                            $inCart = isset($cart[$itm['id']]) && $cart[$itm['id']] > 0;
+                            $cartQty = $cart[$itm['id']] ?? 0;
                             $gUrl  = $itm['gambar'] ? asset('storage/' . $itm['gambar']) : null;
                         @endphp
-                        <button type="button" wire:click="selectItem({{ $itm['id'] }})"
-                            class="relative text-left rounded-2xl border-2 overflow-hidden transition-all duration-200 group
-                                   {{ $isSel ? 'border-teal-600 shadow-xl shadow-teal-600/20 scale-[1.03]' : 'border-slate-200 hover:border-teal-400 hover:shadow-lg' }}">
+                        <div class="relative rounded-2xl border-2 overflow-hidden transition-all duration-200 {{ $inCart ? 'border-teal-600 shadow-xl shadow-teal-600/20' : 'border-slate-200' }}">
                             <div class="relative h-28 bg-gradient-to-br from-slate-700 to-slate-900">
                                 @if($gUrl)
-                                    <img src="{{ $gUrl }}" alt="{{ $itm['nama'] }}" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500">
+                                    <img src="{{ $gUrl }}" alt="{{ $itm['nama'] }}" class="w-full h-full object-cover opacity-80">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
                                         <i class="fas fa-tools text-slate-400 text-3xl opacity-50"></i>
                                     </div>
                                 @endif
-                                <span class="absolute top-2 right-2 text-[9px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-full">{{ $itm['stok'] }} unit</span>
-                                @if($isSel)
-                                    <div class="absolute inset-0 bg-teal-700/30 flex items-center justify-center">
-                                        <div class="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                                            <i class="fas fa-check text-teal-700 text-base"></i>
-                                        </div>
-                                    </div>
+                                <span class="absolute top-2 left-2 text-[9px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-full">{{ $itm['stok'] }} unit</span>
+                                @if($inCart)
+                                    <span class="absolute top-2 right-2 text-[9px] font-black bg-teal-600 text-white px-2 py-0.5 rounded-full">
+                                        {{ $cartQty }}x
+                                    </span>
                                 @endif
                             </div>
                             <div class="p-2.5 bg-white">
-                                <p class="font-bold text-slate-900 text-[11px] leading-snug line-clamp-2">{{ $itm['nama'] }}</p>
-                                @if($isSel)
-                                    <div class="mt-1.5 text-[9px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                        <i class="fas fa-check-circle"></i> Dipilih
-                                    </div>
-                                @endif
+                                <p class="font-bold text-slate-900 text-[11px] leading-snug line-clamp-2 mb-2">{{ $itm['nama'] }}</p>
+                                <div class="flex items-center justify-between gap-1">
+                                    <button type="button" wire:click="removeFromCart({{ $itm['id'] }})"
+                                        class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-all
+                                               {{ $inCart ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-slate-100 text-slate-300 cursor-not-allowed' }}"
+                                        @if(!$inCart) disabled @endif>
+                                        <i class="fas fa-minus text-[10px]"></i>
+                                    </button>
+                                    <span class="text-sm font-black {{ $inCart ? 'text-teal-700' : 'text-slate-300' }}">{{ $cartQty }}</span>
+                                    <button type="button" wire:click="addToCart({{ $itm['id'] }})"
+                                        class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-all
+                                               {{ $cartQty < $itm['stok'] ? 'bg-teal-100 text-teal-600 hover:bg-teal-200' : 'bg-slate-100 text-slate-300 cursor-not-allowed' }}"
+                                        @if($cartQty >= $itm['stok']) disabled @endif>
+                                        <i class="fas fa-plus text-[10px]"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </button>
+                        </div>
                     @endforeach
                 </div>
             @endif
-            @error('selected_item_id') <p class="text-red-500 text-xs mt-2"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p> @enderror
+            @error('cart') <p class="text-red-500 text-xs mt-2"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</p> @enderror
         </div>
-        @else
-        {{-- Item sudah pre-select, tampilkan chip konfirmasi --}}
-        <div class="mt-5 flex items-center gap-3 p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">
-            <div class="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center shrink-0">
-                <i class="fas fa-tools text-teal-600 text-sm"></i>
+
+        {{-- Ringkasan Keranjang --}}
+        @if(count($cart) > 0)
+        <div class="mt-4 p-4 bg-teal-50 border border-teal-200 rounded-2xl">
+            <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i class="fas fa-shopping-basket"></i> Keranjang Sementara ({{ array_sum($cart) }} item)
+            </p>
+            <div class="space-y-1.5">
+                @foreach($this->cartItems as $ci)
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-700 truncate">{{ $ci['nama'] }}</span>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-[10px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded-md">{{ $ci['jumlah'] }}x</span>
+                    </div>
+                </div>
+                @endforeach
             </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Peralatan Dipilih</p>
-                <p class="text-sm font-bold text-slate-900 truncate">{{ $selectedItemData['nama'] ?? '-' }}</p>
-            </div>
-            <span class="text-[9px] font-black bg-teal-600 text-white px-2.5 py-1 rounded-lg">✓ Terpilih</span>
         </div>
         @endif
 
         {{-- Tombol Lanjut --}}
         <button type="button" wire:click="lanjutKeForm"
-            @if(!$selected_item_id) disabled @endif
+            @if(count($cart) === 0) disabled @endif
             class="mt-5 w-full py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2
-                   {{ $selected_item_id ? 'bg-teal-700 hover:bg-teal-800 text-white shadow-lg shadow-teal-900/20 hover:scale-[1.01]' : 'bg-slate-100 text-slate-400 cursor-not-allowed' }}">
+                   {{ count($cart) > 0 ? 'bg-teal-700 hover:bg-teal-800 text-white shadow-lg shadow-teal-900/20 hover:scale-[1.01]' : 'bg-slate-100 text-slate-400 cursor-not-allowed' }}">
             Lanjut Isi Data Diri <i class="fas fa-arrow-right text-xs"></i>
         </button>
     </div>
@@ -564,23 +648,34 @@ new class extends Component
     @if($currentStep === 'form')
     <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 space-y-4">
 
-        {{-- Summary chip item & tanggal --}}
-        <div class="grid grid-cols-2 gap-3 p-4 bg-teal-950 rounded-2xl text-white text-xs">
-            <div>
-                <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Peralatan</p>
-                <p class="font-bold mt-0.5 truncate">{{ $selectedItemData['nama'] ?? '-' }}</p>
+        {{-- Summary item & tanggal --}}
+        @php
+            $cartItems = $this->cartItems;
+            $namaItems = collect($cartItems)->pluck('nama')->implode(', ');
+        @endphp
+        <div class="p-4 bg-teal-950 rounded-2xl text-white text-xs">
+            <div class="mb-3">
+                <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Peralatan Dipinjam</p>
+                @foreach($cartItems as $ci)
+                <div class="flex items-center justify-between mt-1">
+                    <span class="font-bold truncate">{{ $ci['nama'] }}</span>
+                    <span class="shrink-0 ml-2 text-[10px] font-bold text-teal-300 bg-white/10 px-2 py-0.5 rounded-md">{{ $ci['jumlah'] }}x</span>
+                </div>
+                @endforeach
             </div>
-            <div>
-                <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Tanggal Pinjam</p>
-                <p class="font-bold mt-0.5">{{ $tanggal_peminjaman ? Carbon::parse($tanggal_peminjaman)->translatedFormat('d M Y') : '-' }}</p>
-            </div>
-            <div>
-                <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Tanggal Kembali</p>
-                <p class="font-bold mt-0.5">{{ $tanggal_pengembalian ? Carbon::parse($tanggal_pengembalian)->translatedFormat('d M Y') : '-' }}</p>
-            </div>
-            <div>
-                <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">PJ Bertugas</p>
-                <p class="font-bold mt-0.5 truncate">{{ $currentPjName ?: '-' }}</p>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
+                <div>
+                    <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Tanggal Pinjam</p>
+                    <p class="font-bold mt-0.5">{{ $tanggal_peminjaman ? \Carbon\Carbon::parse($tanggal_peminjaman)->translatedFormat('d M Y') : '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Tanggal Kembali</p>
+                    <p class="font-bold mt-0.5">{{ $tanggal_pengembalian ? \Carbon\Carbon::parse($tanggal_pengembalian)->translatedFormat('d M Y') : '-' }}</p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">PJ Bertugas</p>
+                    <p class="font-bold mt-0.5 truncate">{{ $currentPjName ?: '-' }}</p>
+                </div>
             </div>
         </div>
 
@@ -685,9 +780,23 @@ new class extends Component
 
         {{-- Detail rows --}}
         <div class="divide-y divide-slate-50 p-6 space-y-0">
+            {{-- Peralatan (multi-item dari keranjang) --}}
+            <div class="flex items-start gap-4 py-3.5">
+                <div class="w-8 h-8 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-shopping-basket text-teal-600 text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Peralatan Dipinjam</p>
+                    @foreach($this->cartItems as $ci)
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-sm font-semibold text-slate-900">{{ $ci['nama'] }}</span>
+                        <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md ml-2 shrink-0">{{ $ci['jumlah'] }}x</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
             @php
                 $rows = [
-                    ['icon'=>'fa-tools','label'=>'Peralatan','value'=>$selectedItemData['nama'] ?? '-'],
                     ['icon'=>'fa-calendar','label'=>'Tanggal Pinjam','value'=> $tanggal_peminjaman ? Carbon::parse($tanggal_peminjaman)->translatedFormat('l, d F Y') : '-'],
                     ['icon'=>'fa-calendar-check','label'=>'Tanggal Kembali','value'=> $tanggal_pengembalian ? Carbon::parse($tanggal_pengembalian)->translatedFormat('l, d F Y') : '-'],
                     ['icon'=>'fa-user','label'=>'Nama Peminjam','value'=>$nama_peminjam ?? '-'],

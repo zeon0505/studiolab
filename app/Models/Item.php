@@ -22,6 +22,6 @@ class Item extends Model
 
     public function bookings()
     {
-        return $this->hasMany(Booking::class);
+        return $this->belongsToMany(Booking::class, 'booking_items')->withPivot('jumlah')->withTimestamps();
     }
 }

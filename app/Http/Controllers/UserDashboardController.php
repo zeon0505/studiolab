@@ -17,7 +17,7 @@ class UserDashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $query = Booking::with('item', 'penanggungJawab')
+        $query = Booking::with('items', 'penanggungJawab')
             ->where('user_id', $user->id);
 
         // Filter by status jika ada

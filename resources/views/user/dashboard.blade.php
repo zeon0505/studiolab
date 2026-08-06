@@ -110,7 +110,8 @@
                         'selesai'   => ['bg'=>'bg-slate-50',   'border'=>'border-slate-200',   'badge'=>'bg-slate-100 text-slate-600',   'dot'=>'bg-slate-400',               'icon'=>'fas fa-flag-checkered','label'=>'Selesai'],
                     ];
                     $sc = $statusConfig[$booking->status] ?? $statusConfig['pending'];
-                    $isRuangan = $booking->item->tipe === 'ruangan';
+                    $firstItem = $booking->items->first();
+                    $isRuangan = $booking->items->where('tipe', 'ruangan')->count() > 0;
                 @endphp
                 <div class="bg-white rounded-3xl border {{ $sc['border'] }} shadow-sm overflow-hidden hover:shadow-md transition-shadow">
 
@@ -123,11 +124,24 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between gap-2">
                                 <div>
-                                    <p class="font-bold text-slate-900 text-sm leading-snug">{{ $booking->item->nama }}</p>
-                                    <div class="flex items-center gap-1.5 mt-1">
-                                        <span class="text-[10px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{{ $booking->item->kategori }}</span>
-                                        <span class="text-[10px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{{ $booking->item->tipe }}</span>
-                                    </div>
+                                    @if($booking->items->count() > 0)
+                                        @foreach($booking->items as $itm)
+                                        <p class="font-bold text-slate-900 text-sm leading-snug">
+                                            {{ $itm->nama }}
+                                            @if($itm->pivot->jumlah > 1)
+                                            <span class="text-[10px] font-bold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded-md ml-1">{{ $itm->pivot->jumlah }}x</span>
+                                            @endif
+                                        </p>
+                                        @endforeach
+                                        @if($firstItem)
+                                        <div class="flex items-center gap-1.5 mt-1">
+                                            <span class="text-[10px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{{ $firstItem->kategori }}</span>
+                                            <span class="text-[10px] font-bold uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">{{ $firstItem->tipe }}</span>
+                                        </div>
+                                        @endif
+                                    @else
+                                        <p class="font-bold text-slate-900 text-sm leading-snug">Peminjaman Ruangan</p>
+                                    @endif
                                 </div>
                                 {{-- Status Badge --}}
                                 <span class="shrink-0 inline-flex items-center gap-1.5 {{ $sc['badge'] }} text-[10px] font-bold px-2.5 py-1 rounded-full">
