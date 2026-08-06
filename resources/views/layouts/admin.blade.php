@@ -16,29 +16,21 @@
     <style>
         * { font-family: 'Inter', sans-serif; }
         
-        /* Mobile Sidebar Custom CSS */
-        @media (max-width: 767px) {
-            #admin-sidebar {
-                position: fixed !important;
-                transform: translateX(-100%) !important;
-                z-index: 50 !important;
-                height: 100vh !important;
-            }
-            #admin-sidebar.active {
-                transform: translateX(0) !important;
-            }
-            #mobile-sidebar-overlay.active {
-                display: block !important;
-            }
-        }
-        
         /* Desktop Sidebar Reset */
         @media (min-width: 768px) {
             #admin-sidebar {
                 position: sticky !important;
+                top: 0 !important;
+                left: 0 !important;
                 transform: translateX(0) !important;
                 z-index: 40 !important;
                 display: flex !important;
+                height: 100vh !important;
+                width: 240px !important;
+            }
+            /* Paksa sembunyikan tombol close di desktop */
+            #admin-sidebar button {
+                display: none !important;
             }
             #mobile-sidebar-overlay {
                 display: none !important;
@@ -61,7 +53,7 @@
                 <span class="text-[9px] text-slate-400 font-medium">STAIMAS</span>
             </div>
         </div>
-        <button id="mobile-sidebar-toggle" class="text-white hover:text-teal-400 p-1.5 focus:outline-none transition-colors">
+        <button onclick="document.getElementById('admin-sidebar').classList.remove('-translate-x-full'); document.getElementById('admin-sidebar').classList.add('translate-x-0'); document.getElementById('mobile-sidebar-overlay').classList.remove('hidden'); document.body.classList.add('overflow-hidden')" class="text-white hover:text-teal-400 p-1.5 focus:outline-none transition-colors">
             <i class="fas fa-bars text-xl"></i>
         </button>
     </div>
@@ -80,7 +72,7 @@
                     <span class="text-[10px] text-slate-400 font-medium">STAIMAS Wonogiri</span>
                 </div>
             </div>
-            <button id="mobile-sidebar-close" class="md:hidden text-slate-400 hover:text-white p-1 focus:outline-none transition-colors">
+            <button onclick="document.getElementById('admin-sidebar').classList.add('-translate-x-full'); document.getElementById('admin-sidebar').classList.remove('translate-x-0'); document.getElementById('mobile-sidebar-overlay').classList.add('hidden'); document.body.classList.remove('overflow-hidden')" class="md:hidden text-slate-400 hover:text-white p-1 focus:outline-none transition-colors">
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
@@ -164,7 +156,7 @@
     </aside>
 
     {{-- Mobile Sidebar Overlay --}}
-    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300 ease-in-out md:hidden"></div>
+    <div id="mobile-sidebar-overlay" onclick="document.getElementById('admin-sidebar').classList.add('-translate-x-full'); document.getElementById('admin-sidebar').classList.remove('translate-x-0'); document.getElementById('mobile-sidebar-overlay').classList.add('hidden'); document.body.classList.remove('overflow-hidden')" class="fixed inset-0 bg-slate-900/50 z-40 hidden transition-opacity duration-300 ease-in-out md:hidden"></div>
 
     {{-- ===== MAIN CONTENT ===== --}}
     <div class="flex-grow flex flex-col min-w-0">
@@ -208,30 +200,12 @@
 
 {{-- Sidebar Mobile Toggle JS --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleBtn = document.getElementById('mobile-sidebar-toggle');
-        const closeBtn = document.getElementById('mobile-sidebar-close');
-        const sidebar = document.getElementById('admin-sidebar');
-        const overlay = document.getElementById('mobile-sidebar-overlay');
-
-        if (sidebar && overlay) {
-            function openSidebar() {
-                sidebar.classList.add('active');
-                overlay.classList.add('active');
-                document.body.classList.add('overflow-hidden');
-            }
-
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-                document.body.classList.remove('overflow-hidden');
-            }
-
-            if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
-            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-            overlay.addEventListener('click', closeSidebar);
-        }
-    });
+    // Penanganan fallback opsional jika overlay diklik langsung dari JS
+    function closeSidebar() {
+        document.getElementById('admin-sidebar').classList.remove('active');
+        document.getElementById('mobile-sidebar-overlay').classList.remove('active');
+        document.body.classList.remove('overflow-hidden');
+    }
 </script>
 
 </body>
