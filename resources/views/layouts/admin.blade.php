@@ -196,36 +196,84 @@
         </main>
     </div>
 
-{{-- ===== CUSTOM CONFIRM MODAL (Global) ===== --}}
-<div id="custom-confirm-modal" class="fixed inset-0 z-[9999] items-center justify-center p-4" style="display:none">
-    {{-- Backdrop --}}
-    <div id="custom-confirm-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="confirmCancel()"></div>
+{{-- ===== CUSTOM CONFIRM MODAL (Global, Pure Inline CSS) ===== --}}
+<div id="custom-confirm-modal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+">
+    {{-- Backdrop click area --}}
+    <div id="custom-confirm-backdrop" onclick="confirmCancel()" style="position:absolute;inset:0;"></div>
+
     {{-- Modal Box --}}
-    <div id="custom-confirm-box" class="relative bg-white rounded-3xl shadow-2xl shadow-slate-900/30 w-full max-w-sm transform transition-all duration-300 scale-90 opacity-0 overflow-hidden">
-        {{-- Top accent bar --}}
-        <div id="custom-confirm-accent" class="h-1.5 bg-gradient-to-r from-red-500 to-rose-400"></div>
-        <div class="px-7 pt-7 pb-6">
-            {{-- Icon --}}
-            <div class="flex items-center gap-4 mb-5">
-                <div id="custom-confirm-icon-wrap" class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-red-100">
-                    <i id="custom-confirm-icon" class="fas fa-trash-alt text-red-500 text-xl"></i>
+    <div id="custom-confirm-box" style="
+        position: relative;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 25px 60px rgba(15,23,42,0.25), 0 8px 24px rgba(15,23,42,0.12);
+        width: 100%;
+        max-width: 400px;
+        overflow: hidden;
+        transform: scale(0.85) translateY(20px);
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+    ">
+        {{-- Accent bar --}}
+        <div id="custom-confirm-accent" style="height: 5px; background: linear-gradient(90deg, #ef4444, #f43f5e);"></div>
+
+        {{-- Body --}}
+        <div style="padding: 28px 28px 24px;">
+            {{-- Header row --}}
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                <div id="custom-confirm-icon-wrap" style="
+                    width: 52px; height: 52px; border-radius: 16px;
+                    background: #fee2e2;
+                    display: flex; align-items: center; justify-content: center;
+                    flex-shrink: 0;
+                ">
+                    <i id="custom-confirm-icon" class="fas fa-trash-alt" style="color: #ef4444; font-size: 20px;"></i>
                 </div>
                 <div>
-                    <p id="custom-confirm-title" class="font-extrabold text-slate-900 text-base leading-tight">Hapus Data</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Tindakan ini tidak dapat dibatalkan</p>
+                    <p id="custom-confirm-title" style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.3;">Hapus Data</p>
+                    <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0; font-weight: 500;">Tindakan ini tidak dapat dibatalkan</p>
                 </div>
             </div>
+
             {{-- Message --}}
-            <p id="custom-confirm-message" class="text-sm text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3.5"></p>
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px 18px; margin-bottom: 24px;">
+                <p id="custom-confirm-message" style="font-size: 14px; color: #334155; margin: 0; line-height: 1.6; font-weight: 500;"></p>
+            </div>
+
             {{-- Buttons --}}
-            <div class="flex gap-3 mt-6">
-                <button type="button" onclick="confirmCancel()"
-                    class="flex-1 py-3 rounded-2xl font-bold text-sm border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+            <div style="display: flex; gap: 12px;">
+                <button type="button" onclick="confirmCancel()" style="
+                    flex: 1; padding: 13px 0; border-radius: 14px;
+                    border: 2px solid #e2e8f0; background: #f8fafc;
+                    font-size: 14px; font-weight: 700; color: #475569;
+                    cursor: pointer; transition: all 0.15s ease;
+                    font-family: inherit;
+                " onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
                     Batal
                 </button>
-                <button type="button" id="custom-confirm-ok-btn" onclick="confirmOk()"
-                    class="flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
-                    <i class="fas fa-trash-alt text-xs"></i> Hapus
+                <button type="button" id="custom-confirm-ok-btn" onclick="confirmOk()" style="
+                    flex: 1; padding: 13px 0; border-radius: 14px;
+                    border: none;
+                    background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+                    font-size: 14px; font-weight: 700; color: #ffffff;
+                    cursor: pointer; transition: all 0.15s ease;
+                    display: flex; align-items: center; justify-content: center; gap: 8px;
+                    box-shadow: 0 4px 16px rgba(239,68,68,0.35);
+                    font-family: inherit;
+                " onmouseover="this.style.opacity='0.9';this.style.transform='scale(1.02)'" onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
+                    <i class="fas fa-trash-alt" style="font-size: 12px;"></i>
+                    <span id="custom-confirm-ok-label">Hapus</span>
                 </button>
             </div>
         </div>
@@ -233,93 +281,107 @@
 </div>
 
 <script>
-    // ===== Custom Confirm Modal =====
     let _confirmCallback = null;
+    const _themes = {
+        danger: {
+            accent: 'linear-gradient(90deg, #ef4444, #f43f5e)',
+            iconBg: '#fee2e2',
+            iconColor: '#ef4444',
+            iconClass: 'fa-trash-alt',
+            btnBg: 'linear-gradient(135deg, #ef4444 0%, #f43f5e 100%)',
+            btnShadow: 'rgba(239,68,68,0.35)',
+        },
+        warning: {
+            accent: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+            iconBg: '#fef3c7',
+            iconColor: '#d97706',
+            iconClass: 'fa-exclamation-triangle',
+            btnBg: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+            btnShadow: 'rgba(245,158,11,0.35)',
+        },
+        info: {
+            accent: 'linear-gradient(90deg, #0d9488, #06b6d4)',
+            iconBg: '#ccfbf1',
+            iconColor: '#0d9488',
+            iconClass: 'fa-info-circle',
+            btnBg: 'linear-gradient(135deg, #0d9488 0%, #0891b2 100%)',
+            btnShadow: 'rgba(13,148,136,0.35)',
+        },
+    };
 
     function showConfirm(message, callback, options = {}) {
+        const type = options.type || 'danger';
+        const theme = _themes[type] || _themes.danger;
         const modal = document.getElementById('custom-confirm-modal');
         const box   = document.getElementById('custom-confirm-box');
-        const msg   = document.getElementById('custom-confirm-message');
-        const title = document.getElementById('custom-confirm-title');
-        const okBtn = document.getElementById('custom-confirm-ok-btn');
-        const accent = document.getElementById('custom-confirm-accent');
+
+        // Apply content
+        document.getElementById('custom-confirm-message').textContent = message;
+        document.getElementById('custom-confirm-title').textContent = options.title || 'Konfirmasi Hapus';
+        document.getElementById('custom-confirm-ok-label').textContent = options.okLabel || 'Hapus';
+
+        // Apply theme
+        document.getElementById('custom-confirm-accent').style.background = theme.accent;
         const iconWrap = document.getElementById('custom-confirm-icon-wrap');
-        const icon  = document.getElementById('custom-confirm-icon');
-
-        // Apply options
-        const type = options.type || 'danger'; // 'danger' | 'warning' | 'info'
-        msg.textContent = message;
-        title.textContent = options.title || 'Konfirmasi Hapus';
-        okBtn.innerHTML = options.okLabel
-            ? `<i class="fas ${options.okIcon || 'fa-check'} text-xs"></i> ${options.okLabel}`
-            : '<i class="fas fa-trash-alt text-xs"></i> Hapus';
-
-        // Theme by type
-        if (type === 'warning') {
-            accent.className = 'h-1.5 bg-gradient-to-r from-amber-400 to-yellow-400';
-            iconWrap.className = 'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-amber-100';
-            icon.className = 'fas fa-exclamation-triangle text-amber-500 text-xl';
-            okBtn.className = 'flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-lg shadow-amber-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2';
-        } else if (type === 'info') {
-            accent.className = 'h-1.5 bg-gradient-to-r from-teal-500 to-cyan-500';
-            iconWrap.className = 'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-teal-100';
-            icon.className = 'fas fa-info-circle text-teal-600 text-xl';
-            okBtn.className = 'flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg shadow-teal-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2';
-        } else {
-            accent.className = 'h-1.5 bg-gradient-to-r from-red-500 to-rose-400';
-            iconWrap.className = 'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-red-100';
-            icon.className = 'fas fa-trash-alt text-red-500 text-xl';
-            okBtn.className = 'flex-1 py-3 rounded-2xl font-bold text-sm bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02] flex items-center justify-center gap-2';
-        }
+        iconWrap.style.background = theme.iconBg;
+        const icon = document.getElementById('custom-confirm-icon');
+        icon.className = 'fas ' + theme.iconClass;
+        icon.style.color = theme.iconColor;
+        const okBtn = document.getElementById('custom-confirm-ok-btn');
+        okBtn.style.background = theme.btnBg;
+        okBtn.style.boxShadow = '0 4px 16px ' + theme.btnShadow;
+        // Update icon in button
+        okBtn.querySelector('i').className = 'fas ' + (options.okIcon || theme.iconClass);
+        okBtn.querySelector('i').style.fontSize = '12px';
 
         _confirmCallback = callback;
-        modal.style.removeProperty('display');
+
+        // Show modal
         modal.style.display = 'flex';
-        document.body.classList.add('overflow-hidden');
+        document.body.style.overflow = 'hidden';
 
         // Animate in
+        box.style.transform = 'scale(0.85) translateY(20px)';
+        box.style.opacity = '0';
         requestAnimationFrame(() => {
-            box.style.transform = 'scale(1)';
-            box.style.opacity = '1';
+            requestAnimationFrame(() => {
+                box.style.transform = 'scale(1) translateY(0)';
+                box.style.opacity = '1';
+            });
         });
     }
 
     function confirmOk() {
-        _closeConfirmModal();
-        if (_confirmCallback) _confirmCallback();
+        _closeConfirmModal(() => {
+            if (_confirmCallback) _confirmCallback();
+        });
     }
 
     function confirmCancel() {
         _closeConfirmModal();
     }
 
-    function _closeConfirmModal() {
+    function _closeConfirmModal(after) {
         const modal = document.getElementById('custom-confirm-modal');
         const box   = document.getElementById('custom-confirm-box');
-        box.style.transform = 'scale(0.9)';
+        box.style.transform = 'scale(0.85) translateY(20px)';
         box.style.opacity = '0';
         setTimeout(() => {
             modal.style.display = 'none';
-            document.body.classList.remove('overflow-hidden');
-        }, 200);
+            document.body.style.overflow = '';
+            if (after) after();
+        }, 250);
     }
 
-    // Helper: for form submits - attach to a form by id
-    function confirmForm(formId, message, options = {}) {
-        showConfirm(message, () => {
-            document.getElementById(formId).submit();
-        }, options);
-    }
-
-    // Fix sidebar active classes (remove stale class usage)
     function closeSidebar() {
         const s = document.getElementById('admin-sidebar');
         const o = document.getElementById('mobile-sidebar-overlay');
         if (s) { s.classList.add('-translate-x-full'); s.classList.remove('translate-x-0'); }
         if (o) o.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        document.body.style.overflow = '';
     }
 </script>
 
 </body>
 </html>
+
