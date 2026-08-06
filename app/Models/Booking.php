@@ -41,6 +41,12 @@ class Booking extends Model
         return $this->hasMany(BookingItem::class);
     }
 
+    // Relasi singular: untuk backward compat atau booking ruangan yang punya 1 item_id
+    public function item()
+    {
+        return $this->belongsTo(Item::class, 'item_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

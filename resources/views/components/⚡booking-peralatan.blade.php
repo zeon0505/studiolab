@@ -666,11 +666,11 @@ new class extends Component
             <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
                 <div>
                     <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Tanggal Pinjam</p>
-                    <p class="font-bold mt-0.5">{{ $tanggal_peminjaman ? \Carbon\Carbon::parse($tanggal_peminjaman)->translatedFormat('d M Y') : '-' }}</p>
+                    <p class="font-bold mt-0.5">{{ $tanggal_peminjaman ? Carbon::parse($tanggal_peminjaman)->translatedFormat('d M Y') : '-' }}</p>
                 </div>
                 <div>
                     <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">Tanggal Kembali</p>
-                    <p class="font-bold mt-0.5">{{ $tanggal_pengembalian ? \Carbon\Carbon::parse($tanggal_pengembalian)->translatedFormat('d M Y') : '-' }}</p>
+                    <p class="font-bold mt-0.5">{{ $tanggal_pengembalian ? Carbon::parse($tanggal_pengembalian)->translatedFormat('d M Y') : '-' }}</p>
                 </div>
                 <div class="col-span-2">
                     <p class="text-teal-400 text-[9px] uppercase font-black tracking-wider">PJ Bertugas</p>
