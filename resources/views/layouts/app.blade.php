@@ -30,14 +30,10 @@
             </div>
             <div class="flex items-center gap-4">
                 <a href="https://staimaswonogiri.ac.id" target="_blank" class="hover:text-white transition-colors">staimaswonogiri.ac.id</a>
-                <span class="text-teal-700">|</span>
                 @auth
+                    <span class="text-teal-700">|</span>
                     <a href="{{ route('user.dashboard') }}" class="font-semibold hover:text-white transition-colors">
                         <i class="fas fa-user mr-1"></i>{{ Auth::user()->name }}
-                    </a>
-                @else
-                    <a href="{{ route('login') }}" class="hover:text-white transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Masuk
                     </a>
                 @endauth
             </div>

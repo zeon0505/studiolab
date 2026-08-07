@@ -74,10 +74,7 @@
                 </button>
             </form>
 
-            <div class="text-center text-[12px] text-slate-500">
-                Belum punya akun?
-                <a href="{{ route('register') }}" class="font-semibold text-teal-600 hover:underline">Daftar sekarang</a>
-            </div>
+
 
             <div class="text-center">
                 <a href="{{ route('home') }}" class="text-[12px] text-slate-400 hover:text-slate-600 transition-colors">
