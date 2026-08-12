@@ -267,4 +267,52 @@ class WhatsAppService
 
         return implode("\n", $lines);
     }
+
+    /**
+     * Kirim notifikasi deadline pengembalian ke peminjam.
+     */
+    public function notifyDeadlinePengembalian(array $data): bool
+    {
+        $message = $this->buildMessageDeadlinePengembalian($data);
+        $targetPhone = $data['no_wa'] ?? null;
+
+        if (empty($targetPhone)) {
+            Log::warning('[WhatsApp Bot] Nomor WA Peminjam tidak ditemukan untuk notif deadline pengembalian.', [
+                'booking_id' => $data['booking_id'] ?? null,
+            ]);
+            return false;
+        }
+
+        return $this->send($targetPhone, $message, $data['booking_id'] ?? null, 'DeadlinePengembalian');
+    }
+
+    /**
+     * Template pesan reminder deadline pengembalian ke peminjam.
+     */
+    protected function buildMessageDeadlinePengembalian(array $data): string
+    {
+        $lines = [
+            "⏰ *[PENGINGAT PENGEMBALIAN — UPT STAIMAS]*",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "Halo *{$data['nama_peminjam']}*,",
+            "",
+            "Ini adalah pengingat otomatis dari sistem UPT Studio & Lab STAIMAS Wonogiri.",
+            "",
+            "🔴 *HARI INI adalah batas akhir pengembalian* untuk peminjaman berikut:",
+            "",
+            "📋 *DETAIL PEMINJAMAN*",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "🏷 *Barang Dipinjam* : {$data['nama_item']}",
+            "📅 *Deadline Kembali*: {$data['tanggal_kembali']}",
+            "",
+            "⚠️ Mohon segera kembalikan barang/peralatan dalam kondisi baik ke petugas UPT sebelum jam operasional berakhir.",
+            "",
+            "Terima kasih atas kerja samanya! 🙏",
+            "",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "_Bot Portal UPT Studio & Lab STAIMAS Wonogiri_",
+        ];
+
+        return implode("\n", $lines);
+    }
 }

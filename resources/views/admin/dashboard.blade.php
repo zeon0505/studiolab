@@ -219,7 +219,7 @@
                                             data-nama="{{ $booking->nama_peminjam }}"
                                             data-instansi="{{ $booking->instansi_peminjam }}"
                                             data-item="{{ $booking->items->pluck('nama')->implode(', ') }}"
-                                            data-waktu="{{ $booking->tanggal_peminjaman->format('d M Y') }} @if($booking->jam_mulai)({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@endif"
+                                            data-waktu="@if($booking->jam_mulai){{ $booking->tanggal_peminjaman->format('d M Y') }} ({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@else{{ $booking->tanggal_peminjaman->format('d M Y') }} s/d {{ $booking->tanggal_pengembalian->format('d M Y') }} ({{ ($booking->tanggal_peminjaman->diffInDays($booking->tanggal_pengembalian) < 1 ? 1 : $booking->tanggal_peminjaman->diffInDays($booking->tanggal_pengembalian) + 1) }} Hari)@endif"
                                             data-bukti="{{ asset('storage/' . $booking->bukti_peminjam) }}"
                                             data-wa="{{ $booking->no_wa }}"
                                             data-kursi="{{ $booking->jumlah_kursi }}"
@@ -242,7 +242,7 @@
                                         data-nama="{{ $booking->nama_peminjam }}"
                                         data-instansi="{{ $booking->instansi_peminjam }}"
                                         data-item="{{ $booking->items->pluck('nama')->implode(', ') }}"
-                                        data-waktu="{{ $booking->tanggal_peminjaman->format('d M Y') }} @if($booking->jam_mulai)({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@endif"
+                                        data-waktu="@if($booking->jam_mulai){{ $booking->tanggal_peminjaman->format('d M Y') }} ({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@else{{ $booking->tanggal_peminjaman->format('d M Y') }} s/d {{ $booking->tanggal_pengembalian->format('d M Y') }} ({{ ($booking->tanggal_peminjaman->diffInDays($booking->tanggal_pengembalian) < 1 ? 1 : $booking->tanggal_peminjaman->diffInDays($booking->tanggal_pengembalian) + 1) }} Hari)@endif"
                                         data-bukti="{{ asset('storage/' . $booking->bukti_peminjam) }}"
                                         data-wa="{{ $booking->no_wa }}"
                                         data-kursi="{{ $booking->jumlah_kursi }}"
@@ -305,15 +305,21 @@
                         </a>
                     </div>
                 </div>
-                <div class="space-y-1">
-                    <span class="text-slate-400 block font-semibold uppercase text-[9px]">Item & Jadwal</span>
-                    <strong id="review-item" class="text-slate-800 text-[12px] block"></strong>
-                    <span id="review-waktu" class="block text-slate-500 font-medium"></span>
+                <div class="space-y-1.5">
+                    <span class="text-slate-400 block font-semibold uppercase text-[9px]">Item Dipinjam</span>
+                    <strong id="review-item" class="text-slate-800 text-[12px] block leading-snug"></strong>
+
+                    <div class="mt-2 pt-2 border-t border-slate-200/60 space-y-1">
+                        <span class="text-slate-400 block font-semibold uppercase text-[9px]">Jadwal</span>
+                        <div id="review-waktu-box">
+                            {{-- Diisi via JS --}}
+                        </div>
+                    </div>
 
                     {{-- Jumlah Kursi --}}
-                    <div id="review-kursi-container" class="mt-2 pt-2 border-t border-slate-200/60 hidden">
-                        <span class="text-slate-400 block font-semibold uppercase text-[9px]">Permintaan Kursi</span>
-                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 mt-1">
+                    <div id="review-kursi-container" class="mt-1 hidden">
+                        <span class="text-slate-400 block font-semibold uppercase text-[9px] mb-1">Permintaan Kursi</span>
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                             <i class="fas fa-chair text-[8px]"></i> <span id="review-kursi-text">0</span> Kursi
                         </span>
                     </div>
@@ -378,7 +384,52 @@ function openReviewModal(btn) {
     document.getElementById('review-nama').innerText = nama;
     document.getElementById('review-instansi').innerText = instansi;
     document.getElementById('review-item').innerText = item;
-    document.getElementById('review-waktu').innerText = waktu;
+
+    // Render jadwal dengan format rapi
+    const waktuBox = document.getElementById('review-waktu-box');
+    if (waktu) {
+        // Deteksi apakah multi-hari (mengandung "s/d") atau sesi jam
+        if (waktu.includes('s/d')) {
+            // Format: "12 Aug 2026 s/d 15 Aug 2026 (4 Hari)"
+            const parts = waktu.match(/(.+?)\s+s\/d\s+(.+?)\s+\((.+?)\)/);
+            if (parts) {
+                waktuBox.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-bold text-slate-400 w-12 shrink-0">MULAI</span>
+                            <span class="text-[11px] font-semibold text-slate-700">${parts[1]}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-bold text-slate-400 w-12 shrink-0">KEMBALI</span>
+                            <span class="text-[11px] font-semibold text-slate-700">${parts[2]}</span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 text-[10px] text-teal-600 font-bold bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100 mt-0.5">
+                            <i class="fas fa-calendar-day text-[9px]"></i> ${parts[3]}
+                        </span>
+                    </div>`;
+            } else {
+                waktuBox.innerHTML = `<span class="text-[11px] text-slate-600">${waktu}</span>`;
+            }
+        } else {
+            // Format jam sesi: "12 Aug 2026 (08:00 - 10:00 WIB)"
+            const parts = waktu.match(/(.+?)\s+\((.+?)\)/);
+            if (parts) {
+                waktuBox.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-bold text-slate-400 w-12 shrink-0">TANGGAL</span>
+                            <span class="text-[11px] font-semibold text-slate-700">${parts[1]}</span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 text-[10px] text-teal-600 font-bold bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">
+                            <i class="far fa-clock text-[9px]"></i> ${parts[2]}
+                        </span>
+                    </div>`;
+            } else {
+                waktuBox.innerHTML = `<span class="text-[11px] text-slate-600">${waktu}</span>`;
+            }
+        }
+    }
+
     document.getElementById('review-bukti-img').src = bukti;
     document.getElementById('review-bukti-fullscreen').href = bukti;
     document.getElementById('review-alasan').innerText = catatan;

@@ -136,20 +136,20 @@
                             </td>
                             <td class="px-6 py-4">
                                 <button 
-                                    data-id="{{ $booking->id }}"
-                                    data-nama="{{ $booking->nama_peminjam }}"
-                                    data-instansi="{{ $booking->instansi_peminjam }}"
-                                    data-item="{{ $booking->items->pluck('nama')->implode(', ') }}"
-                                    data-waktu="{{ $booking->tanggal_peminjaman->format('d M Y') }} @if($booking->jam_mulai)({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@endif"
-                                    data-bukti="{{ asset('storage/' . $booking->bukti_peminjam) }}"
-                                    data-wa="{{ $booking->no_wa }}"
-                                    data-kursi="{{ $booking->jumlah_kursi }}"
-                                    data-catatan="{{ $booking->catatan }}"
-                                    data-status="{{ $booking->status }}"
-                                    onclick="openReviewModal(this)"
-                                    class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1 shadow-sm">
-                                    <i class="far fa-eye text-xs"></i> Detail
-                                </button>
+                                     data-id="{{ $booking->id }}"
+                                     data-nama="{{ $booking->nama_peminjam }}"
+                                     data-instansi="{{ $booking->instansi_peminjam }}"
+                                     data-item="{{ $booking->items->pluck('nama')->implode(', ') }}"
+                                     data-waktu="@if($booking->jam_mulai){{ $booking->tanggal_peminjaman->format('d M Y') }} ({{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB)@else{{ $booking->tanggal_peminjaman->format('d M Y') }} s/d {{ $booking->tanggal_pengembalian->format('d M Y') }} ({{ ($booking->tanggal_peminjaman->diffInDays($booking->tanggal_pengembalian) < 1 ? 1 : $booking->tanggal_peminjaman->diffInDays($booking->tanggal_pengembalian) + 1) }} Hari)@endif"
+                                     data-bukti="{{ asset('storage/' . $booking->bukti_peminjam) }}"
+                                     data-wa="{{ $booking->no_wa }}"
+                                     data-kursi="{{ $booking->jumlah_kursi }}"
+                                     data-catatan="{{ $booking->catatan }}"
+                                     data-status="{{ $booking->status }}"
+                                     onclick="openReviewModal(this)"
+                                     class="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1 shadow-sm">
+                                     <i class="far fa-eye text-xs"></i> Detail
+                                 </button>
                             </td>
                         </tr>
                     @empty

@@ -52,6 +52,9 @@ class AdminController extends Controller
 
     public function dashboard(Request $request)
     {
+        // --- AUTO REMINDER: Cek deadline pengembalian hari ini ---
+        $this->sendReturnDeadlineReminders();
+
         $query = Booking::with('items', 'penanggungJawab');
 
         // Filter Tipe (Peralatan vs Ruangan)
@@ -335,5 +338,50 @@ class AdminController extends Controller
     {
         $assignment->delete();
         return back()->with('success', 'Penugasan PJ harian berhasil dihapus.');
+    }
+
+    /**
+     * Cek booking yang deadline pengembaliannya hari ini dan kirim WA reminder otomatis.
+     * Dipanggil setiap kali admin membuka dashboard — flag reminder_sent mencegah spam.
+     */
+    private function sendReturnDeadlineReminders(): void
+    {
+        $today = Carbon::today();
+
+        $bookingsDeadline = Booking::with('items')
+            ->whereDate('tanggal_pengembalian', $today)
+            ->whereIn('status', ['disetujui'])
+            ->whereNull('jam_mulai')
+            ->where('reminder_sent', false)
+            ->get();
+
+        if ($bookingsDeadline->isEmpty()) {
+            return;
+        }
+
+        $whatsApp = app(WhatsAppService::class);
+
+        foreach ($bookingsDeadline as $booking) {
+            if (empty($booking->no_wa)) {
+                $booking->update(['reminder_sent' => true]);
+                continue;
+            }
+
+            $namaItems = $booking->items->pluck('nama')->implode(', ');
+            if (empty($namaItems)) {
+                $namaItems = 'Item Peminjaman';
+            }
+
+            $whatsApp->notifyDeadlinePengembalian([
+                'booking_id'     => $booking->id,
+                'no_wa'          => $booking->no_wa,
+                'nama_peminjam'  => $booking->nama_peminjam,
+                'nama_item'      => $namaItems,
+                'tanggal_kembali'=> $today->format('d M Y'),
+            ]);
+
+            // Tandai sudah dikirim agar tidak dikirim berulang
+            $booking->update(['reminder_sent' => true]);
+        }
     }
 }

@@ -24,6 +24,7 @@ class Booking extends Model
         'jumlah_kursi',
         'status',
         'catatan',
+        'reminder_sent',
     ];
 
     protected $casts = [
