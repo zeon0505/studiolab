@@ -160,14 +160,26 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <p class="text-[13px] font-medium text-slate-700">{{ $booking->tanggal_peminjaman->format('d M Y') }}</p>
                                 @if($booking->jam_mulai)
-                                    <p class="text-[12px] font-bold text-teal-600 mt-0.5">
+                                    <p class="text-[13px] font-medium text-slate-700">{{ $booking->tanggal_peminjaman->format('d M Y') }}</p>
+                                    <p class="text-[11px] font-bold text-teal-600 mt-0.5">
                                         <i class="far fa-clock mr-0.5"></i>
                                         {{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} – {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }} WIB
                                     </p>
+                                    <span class="text-[10px] text-slate-400 font-semibold">(1 Hari / Jam Sesi)</span>
                                 @else
-                                    <p class="text-[11px] text-slate-400 mt-0.5">s/d {{ $booking->tanggal_pengembalian->format('d M Y') }}</p>
+                                    @php
+                                        $diff = $booking->tanggal_peminjaman->diffInDays($booking->tanggal_pengembalian);
+                                        $days = $diff < 1 ? 1 : $diff + 1;
+                                    @endphp
+                                    <p class="text-[13px] font-medium text-slate-700">
+                                        {{ $booking->tanggal_peminjaman->format('d M Y') }}
+                                        <span class="text-slate-400">s/d</span>
+                                        {{ $booking->tanggal_pengembalian->format('d M Y') }}
+                                    </p>
+                                    <span class="inline-flex items-center gap-1 text-[10px] text-teal-600 font-bold mt-1 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">
+                                        <i class="fas fa-calendar-day text-[9px]"></i> {{ $days }} Hari Peminjaman
+                                    </span>
                                 @endif
                             </td>
                             <td class="px-6 py-4">
