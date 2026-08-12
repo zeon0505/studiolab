@@ -66,26 +66,26 @@
             {{-- Form Tambah Staff Baru --}}
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
                 <h3 class="font-bold text-slate-800 text-[13px] mb-4">Daftarkan Staff / PJ Baru</h3>
-                <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-3">
+                <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-3" autocomplete="off">
                     @csrf
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nama Lengkap</label>
-                        <input type="text" name="name" required placeholder="Nama Staff"
+                        <input type="text" name="name" required placeholder="Nama Staff" autocomplete="off"
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-[12px] focus:outline-none focus:ring-2 focus:ring-teal-500">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email</label>
-                        <input type="email" name="email" required placeholder="email@staimas.com"
+                        <input type="email" name="email" required placeholder="email@staimas.com" autocomplete="off"
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-[12px] focus:outline-none focus:ring-2 focus:ring-teal-500">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nomor WhatsApp (No WA)</label>
-                        <input type="tel" name="no_wa" placeholder="081234567890"
+                        <input type="tel" name="no_wa" placeholder="081234567890" autocomplete="off"
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-[12px] focus:outline-none focus:ring-2 focus:ring-teal-500">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Password Awal</label>
-                        <input type="password" name="password" required placeholder="••••••"
+                        <input type="password" name="password" required placeholder="••••••" autocomplete="new-password"
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-[12px] focus:outline-none focus:ring-2 focus:ring-teal-500">
                     </div>
                     <button type="submit" class="w-full bg-teal-800 hover:bg-teal-900 text-white font-bold py-2 rounded-xl text-[12px] transition-colors mt-2">
