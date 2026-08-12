@@ -10,6 +10,27 @@
         <p class="text-[12px] text-slate-400 mt-0.5">Atur staf UPT yang bertugas per hari. Pastikan nomor WA diisi agar notifikasi bot dapat terkirim.</p>
     </div>
 
+    @if(session('success'))
+        <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[13px] font-medium px-4 py-3 rounded-xl">
+            <i class="fas fa-check-circle text-emerald-500"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-700 text-[13px] font-medium px-4 py-3 rounded-xl space-y-1">
+            <div class="flex items-center gap-2 font-bold">
+                <i class="fas fa-exclamation-circle text-red-500"></i>
+                Terjadi Kesalahan:
+            </div>
+            <ul class="list-disc list-inside pl-4 space-y-0.5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Form Atur PJ & Tambah Staff Baru --}}
