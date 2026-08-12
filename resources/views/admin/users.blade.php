@@ -22,6 +22,20 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-700 text-[13px] font-medium px-4 py-3 rounded-xl space-y-1">
+            <div class="flex items-center gap-2 font-bold">
+                <i class="fas fa-exclamation-circle text-red-500"></i>
+                Terjadi Kesalahan:
+            </div>
+            <ul class="list-disc list-inside pl-4 space-y-0.5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- Search and Filters --}}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
         <div class="px-6 py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
