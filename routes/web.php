@@ -94,4 +94,5 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Manajemen Pengguna Terdaftar
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
     Route::post('/users/{user}/reset-password', [AdminController::class, 'userResetPassword'])->name('users.reset-password');
+    Route::delete('/users/{user}/destroy', [AdminController::class, 'userDestroy'])->name('users.destroy');
 });

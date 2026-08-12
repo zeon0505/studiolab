@@ -423,4 +423,14 @@ class AdminController extends Controller
 
         return back()->with('success', "Password akun {$user->name} berhasil diubah.");
     }
+
+    /**
+     * Hapus akun user.
+     */
+    public function userDestroy(User $user)
+    {
+        $name = $user->name;
+        $user->delete();
+        return back()->with('success', "Akun {$name} berhasil dihapus.");
+    }
 }

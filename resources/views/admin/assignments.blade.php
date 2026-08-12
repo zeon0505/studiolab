@@ -152,22 +152,40 @@
         </div>
         <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             @foreach($users as $user)
-                <form action="{{ route('admin.users.update-wa', $user->id) }}" method="POST" class="flex items-center gap-3">
-                    @csrf
+                <div class="flex items-center gap-3">
+                    {{-- Avatar --}}
                     <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 text-xs font-bold shrink-0">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[12px] font-semibold text-slate-700 truncate">{{ $user->name }}</p>
-                        <input type="tel" name="no_wa" value="{{ $user->no_wa }}"
-                            class="w-full px-2.5 py-1.5 mt-1 rounded-lg border border-slate-200 bg-slate-50 text-[12px] focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            placeholder="0812-3456-7890">
-                    </div>
-                    <button type="submit"
-                        class="w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shrink-0 transition-colors">
-                        <i class="fas fa-check text-xs"></i>
-                    </button>
-                </form>
+
+                    {{-- Nama + Update WA --}}
+                    <form action="{{ route('admin.users.update-wa', $user->id) }}" method="POST" class="flex items-center gap-2 flex-1 min-w-0">
+                        @csrf
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[12px] font-semibold text-slate-700 truncate">{{ $user->name }}</p>
+                            <input type="tel" name="no_wa" value="{{ $user->no_wa }}"
+                                class="w-full px-2.5 py-1.5 mt-1 rounded-lg border border-slate-200 bg-slate-50 text-[12px] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                placeholder="0812-3456-7890">
+                        </div>
+                        <button type="submit"
+                            class="w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shrink-0 transition-colors">
+                            <i class="fas fa-check text-xs"></i>
+                        </button>
+                    </form>
+
+                    {{-- Hapus User --}}
+                    <form id="del-staff-{{ $user->id }}"
+                        action="{{ route('admin.users.destroy', $user->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button"
+                            onclick="if(confirm('Hapus akun {{ addslashes($user->name) }}? Tindakan ini tidak dapat diurungkan.')) document.getElementById('del-staff-{{ $user->id }}').submit()"
+                            class="w-8 h-8 rounded-lg bg-red-100 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center shrink-0 transition-colors"
+                            title="Hapus akun">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    </form>
+                </div>
             @endforeach
         </div>
     </div>

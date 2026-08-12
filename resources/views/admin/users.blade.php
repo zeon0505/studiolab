@@ -51,7 +51,7 @@
                         <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kontak</th>
                         <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Peminjaman</th>
                         <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Terdaftar Sejak</th>
-                        <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aksi</th>
+                        <th class="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider" colspan="2">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -97,7 +97,7 @@
                                 <p class="text-[11px] text-slate-400">{{ $user->created_at->diffForHumans() }}</p>
                             </td>
 
-                            {{-- Aksi Reset Password --}}
+                            {{-- Aksi --}}
                             <td class="px-6 py-4">
                                 <button
                                     data-id="{{ $user->id }}"
@@ -107,10 +107,22 @@
                                     <i class="fas fa-key text-xs"></i> Ubah Password
                                 </button>
                             </td>
+                            <td class="px-6 py-4">
+                                <form id="del-user-{{ $user->id }}"
+                                    action="{{ route('admin.users.destroy', $user->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button"
+                                        onclick="if(confirm('Hapus akun {{ addslashes($user->name) }}? Semua data peminjaman terkait juga akan terpengaruh.')) document.getElementById('del-user-{{ $user->id }}').submit()"
+                                        class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                                        <i class="fas fa-trash text-xs"></i> Hapus Akun
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-16 text-center">
+                            <td colspan="6" class="px-6 py-16 text-center">
                                 <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                                     <i class="fas fa-user-slash text-slate-300 text-xl"></i>
                                 </div>
