@@ -22,19 +22,43 @@
         </div>
     @endif
 
-    {{-- Search --}}
+    {{-- Search and Filters --}}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-        <div class="px-6 py-4 border-b border-slate-100">
-            <form method="GET" action="{{ route('admin.users.index') }}" class="flex gap-2">
+        <div class="px-6 py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            
+            {{-- Tabs Filter --}}
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl w-fit">
+                <a href="{{ route('admin.users.index', array_merge(request()->query(), ['role' => 'all'])) }}"
+                    class="px-4 py-1.5 rounded-lg text-[12px] font-bold transition-all duration-150
+                    {{ $filterRole === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800' }}">
+                    Semua
+                </a>
+                <a href="{{ route('admin.users.index', array_merge(request()->query(), ['role' => 'staff'])) }}"
+                    class="px-4 py-1.5 rounded-lg text-[12px] font-bold transition-all duration-150
+                    {{ $filterRole === 'staff' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800' }}">
+                    Staff UPT
+                </a>
+                <a href="{{ route('admin.users.index', array_merge(request()->query(), ['role' => 'peminjam'])) }}"
+                    class="px-4 py-1.5 rounded-lg text-[12px] font-bold transition-all duration-150
+                    {{ $filterRole === 'peminjam' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800' }}">
+                    Pendaftar Peminjam
+                </a>
+            </div>
+
+            {{-- Form Cari --}}
+            <form method="GET" action="{{ route('admin.users.index') }}" class="flex items-center gap-2 flex-1 md:max-w-md">
+                @if(request('role'))
+                    <input type="hidden" name="role" value="{{ request('role') }}">
+                @endif
                 <input type="text" name="search" value="{{ request('search') }}"
-                    placeholder="Cari nama atau email pengguna..."
-                    class="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-50">
+                    placeholder="Cari nama atau email..."
+                    class="w-full px-4 py-2 rounded-xl border border-slate-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-50">
                 <button type="submit"
-                    class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-[12px] font-bold rounded-xl transition-colors">
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-[12px] font-bold rounded-xl transition-colors whitespace-nowrap">
                     <i class="fas fa-search"></i> Cari
                 </button>
                 @if(request('search'))
-                    <a href="{{ route('admin.users.index') }}"
+                    <a href="{{ route('admin.users.index', ['role' => request('role')]) }}"
                         class="px-4 py-2 border border-slate-200 text-slate-600 text-[12px] font-bold rounded-xl hover:bg-slate-50 transition-colors">
                         Reset
                     </a>

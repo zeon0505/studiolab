@@ -183,6 +183,7 @@ class AdminController extends Controller
             'email' => $request->email,
             'no_wa' => $request->no_wa,
             'password' => Hash::make($request->password),
+            'is_staff' => true,
         ]);
 
         return back()->with('success', 'Staff / PJ baru berhasil ditambahkan.');
@@ -301,7 +302,7 @@ class AdminController extends Controller
 
     public function assignmentsIndex()
     {
-        $users = \App\Models\User::all();
+        $users = \App\Models\User::where('is_staff', true)->get();
         $assignments = \App\Models\DailyAssignment::with('user')->get()->keyBy('hari');
         $days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
 
@@ -391,10 +392,17 @@ class AdminController extends Controller
     public function usersIndex(Request $request)
     {
         $search = $request->query('search');
+        $filterRole = $request->query('role', 'all'); // 'all', 'staff', 'peminjam'
 
         $query = User::whereNotIn('email', ['admin@staimas.com', 'yoga@staimas.com'])
             ->withCount('bookings')
             ->latest();
+
+        if ($filterRole === 'staff') {
+            $query->where('is_staff', true);
+        } elseif ($filterRole === 'peminjam') {
+            $query->where('is_staff', false);
+        }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -405,7 +413,7 @@ class AdminController extends Controller
 
         $users = $query->paginate(15)->withQueryString();
 
-        return view('admin.users', compact('users'));
+        return view('admin.users', compact('users', 'filterRole'));
     }
 
     /**
