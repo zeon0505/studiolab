@@ -384,4 +384,43 @@ class AdminController extends Controller
             $booking->update(['reminder_sent' => true]);
         }
     }
+
+    /**
+     * Daftar semua pengguna terdaftar (non-admin).
+     */
+    public function usersIndex(Request $request)
+    {
+        $search = $request->query('search');
+
+        $query = User::whereNotIn('email', ['admin@staimas.com', 'yoga@staimas.com'])
+            ->withCount('bookings')
+            ->latest();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        $users = $query->paginate(15)->withQueryString();
+
+        return view('admin.users', compact('users'));
+    }
+
+    /**
+     * Reset password user oleh admin.
+     */
+    public function userResetPassword(Request $request, User $user)
+    {
+        $request->validate([
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', "Password akun {$user->name} berhasil diubah.");
+    }
 }

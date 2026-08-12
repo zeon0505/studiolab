@@ -125,6 +125,13 @@
                 <span class="ml-auto text-[8px] font-black px-1.5 py-0.5 rounded-md {{ request()->routeIs('admin.scan-qr') ? 'bg-white/20 text-white' : 'bg-teal-500/20 text-teal-400' }} uppercase tracking-wider">Baru</span>
             </a>
 
+            <a href="{{ route('admin.users.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
+                      {{ request()->routeIs('admin.users.*') ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                <i class="fas fa-users w-4 text-center {{ request()->routeIs('admin.users.*') ? 'text-teal-700' : 'text-slate-400' }}"></i>
+                <span>Kelola Pengguna</span>
+            </a>
+
             <div class="pt-3 mt-3 border-t border-white/5">
                 <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">LAINNYA</p>
                 <a href="{{ route('home') }}" target="_blank"
