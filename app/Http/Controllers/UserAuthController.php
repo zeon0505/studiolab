@@ -54,8 +54,9 @@ class UserAuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
-            // Cek jika yang login adalah admin, paksa langsung ke dashboard admin
-            if (in_array($request->email, ['admin@staimas.com', 'yoga@staimas.com'])) {
+            // Cek jika yang login adalah admin/staff, paksa langsung ke dashboard admin
+            $user = Auth::user();
+            if ($user->is_staff || in_array($user->email, ['admin@staimas.com', 'yoga@staimas.com'])) {
                 return redirect()->route('admin.dashboard');
             }
 

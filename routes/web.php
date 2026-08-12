@@ -63,8 +63,8 @@ Route::middleware('auth')->group(function () {
 Route::redirect('/admin', '/admin/dashboard');
 Route::redirect('/admin/login', '/login');
 
-// Dashboard Admin (Terproteksi Auth & Admin Email)
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+// Dashboard Admin (Terproteksi Auth & Staff Check)
+Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/history', [AdminController::class, 'history'])->name('history');
     

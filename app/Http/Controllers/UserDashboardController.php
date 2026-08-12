@@ -12,8 +12,8 @@ class UserDashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Jika admin mengakses dashboard user biasa, alihkan ke dashboard admin
-        if (in_array($user->email, ['admin@staimas.com', 'yoga@staimas.com'])) {
+        // Jika admin/staff mengakses dashboard user biasa, alihkan ke dashboard admin
+        if ($user->is_staff || in_array($user->email, ['admin@staimas.com', 'yoga@staimas.com'])) {
             return redirect()->route('admin.dashboard');
         }
 
