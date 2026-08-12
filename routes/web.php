@@ -57,12 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/peminjaman/ruangan', [PageController::class, 'peminjamanRuangan'])->name('pages.peminjaman.ruangan');
     Route::get('/peminjaman/peralatan', [PageController::class, 'peminjamanPeralatan'])->name('pages.peminjaman.peralatan');
     Route::get('/peminjaman/form/{item}', [PageController::class, 'peminjamanForm'])->name('pages.peminjaman.form');
-
-    // CRUD Inventaris for User
-    Route::get('/dashboard/items', [UserDashboardController::class, 'itemsIndex'])->name('user.items.index');
-    Route::post('/dashboard/items/store', [UserDashboardController::class, 'itemsStore'])->name('user.items.store');
-    Route::put('/dashboard/items/{item}/update', [UserDashboardController::class, 'itemsUpdate'])->name('user.items.update');
-    Route::delete('/dashboard/items/{item}/delete', [UserDashboardController::class, 'itemsDestroy'])->name('user.items.destroy');
 });
 
 // Redirect URL Admin yang sering diketik manual agar tidak 404

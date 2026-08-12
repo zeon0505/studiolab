@@ -88,19 +88,7 @@
                 <span>Riwayat Peminjaman</span>
             </a>
 
-            <a href="{{ route('user.items.index', ['tipe' => 'ruangan']) }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
-                      {{ request()->routeIs('user.items.*') && request('tipe') === 'ruangan' ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                <i class="fas fa-door-open w-4 text-center {{ request()->routeIs('user.items.*') && request('tipe') === 'ruangan' ? 'text-teal-700' : 'text-slate-400' }}"></i>
-                <span>Kelola Ruangan</span>
-            </a>
 
-            <a href="{{ route('user.items.index', ['tipe' => 'peralatan']) }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150
-                      {{ request()->routeIs('user.items.*') && request('tipe') === 'peralatan' ? 'bg-white text-slate-900 font-semibold shadow-sm' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                <i class="fas fa-camera w-4 text-center {{ request()->routeIs('user.items.*') && request('tipe') === 'peralatan' ? 'text-teal-700' : 'text-slate-400' }}"></i>
-                <span>Kelola Peralatan</span>
-            </a>
 
             <div class="pt-3 mt-3 border-t border-white/5">
                 <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2">LAINNYA</p>
