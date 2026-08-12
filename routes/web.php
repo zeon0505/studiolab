@@ -11,9 +11,6 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/peralatan', [PageController::class, 'peralatan'])->name('pages.peralatan');
 Route::get('/alur', [PageController::class, 'alur'])->name('pages.alur');
 Route::get('/struktur', [PageController::class, 'struktur'])->name('pages.struktur');
-Route::get('/peminjaman/ruangan', [PageController::class, 'peminjamanRuangan'])->name('pages.peminjaman.ruangan');
-Route::get('/peminjaman/peralatan', [PageController::class, 'peminjamanPeralatan'])->name('pages.peminjaman.peralatan');
-Route::get('/peminjaman/form/{item}', [PageController::class, 'peminjamanForm'])->name('pages.peminjaman.form');
 Route::get('/kalender', [PageController::class, 'kalender'])->name('pages.kalender');
 
 // Sitemap XML untuk Google Indexing
@@ -23,8 +20,6 @@ Route::get('/sitemap.xml', function() {
         '/peralatan',
         '/alur',
         '/struktur',
-        '/peminjaman/ruangan',
-        '/peminjaman/peralatan',
         '/kalender'
     ];
     
@@ -54,9 +49,20 @@ Route::get('/register', [UserAuthController::class, 'registerForm'])->name('regi
 Route::post('/register', [UserAuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
 
-// Dashboard User (Terproteksi Auth)
+// Dashboard User & Fitur Terproteksi Auth
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    
+    // Peminjaman Terproteksi Login
+    Route::get('/peminjaman/ruangan', [PageController::class, 'peminjamanRuangan'])->name('pages.peminjaman.ruangan');
+    Route::get('/peminjaman/peralatan', [PageController::class, 'peminjamanPeralatan'])->name('pages.peminjaman.peralatan');
+    Route::get('/peminjaman/form/{item}', [PageController::class, 'peminjamanForm'])->name('pages.peminjaman.form');
+
+    // CRUD Inventaris for User
+    Route::get('/dashboard/items', [UserDashboardController::class, 'itemsIndex'])->name('user.items.index');
+    Route::post('/dashboard/items/store', [UserDashboardController::class, 'itemsStore'])->name('user.items.store');
+    Route::put('/dashboard/items/{item}/update', [UserDashboardController::class, 'itemsUpdate'])->name('user.items.update');
+    Route::delete('/dashboard/items/{item}/delete', [UserDashboardController::class, 'itemsDestroy'])->name('user.items.destroy');
 });
 
 // Redirect URL Admin yang sering diketik manual agar tidak 404
