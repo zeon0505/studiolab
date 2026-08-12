@@ -85,6 +85,12 @@
                         <i class="fas fa-desktop text-xs"></i> Dashboard
                     </a>
                 @else
+                    <a href="{{ route('login') }}" class="text-[13px] font-semibold text-slate-600 hover:text-teal-700 px-3 py-2 transition-all">
+                        Masuk
+                    </a>
+                    <a href="{{ route('register') }}" class="text-[13px] font-semibold text-slate-600 hover:text-teal-700 border border-slate-200 px-3 py-2 rounded-lg transition-all hover:bg-slate-50">
+                        Daftar
+                    </a>
                     <a href="{{ route('pages.peralatan') }}"
                        class="hidden sm:inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition-colors">
                         <i class="fas fa-clipboard-list text-xs"></i> Ajukan Pinjam
@@ -118,6 +124,15 @@
                     <a href="{{ route('user.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-teal-700 bg-teal-50">
                         <i class="fas fa-desktop w-4 text-center text-teal-500"></i> Dashboard Akun
                     </a>
+                @else
+                    <div class="grid grid-cols-2 gap-2 pt-2 px-1">
+                        <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-[13px] font-bold text-center border border-slate-200 text-slate-600 hover:bg-slate-50">
+                            Masuk
+                        </a>
+                        <a href="{{ route('register') }}" class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-[13px] font-bold text-center bg-teal-600 text-white hover:bg-teal-700">
+                            Daftar
+                        </a>
+                    </div>
                 @endauth
             </div>
         </div>
