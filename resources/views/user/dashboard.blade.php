@@ -311,16 +311,7 @@ function openEditTanggal(bookingId, currentDate, minDate) {
     input.min   = minDate;
 
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
-function closeEditTanggal() {
-    const modal = document.getElementById('editTanggalModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-</script>
-    @endphp
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Menunggu</span>
@@ -477,6 +468,13 @@ function closeEditTanggal() {
                             <div class="flex items-center gap-2 text-xs text-slate-600">
                                 <i class="fas fa-calendar-check text-slate-400"></i>
                                 <span>Kembali: <strong>{{ $booking->tanggal_pengembalian->translatedFormat('d M Y') }}</strong></span>
+                                {{-- Tombol edit tanggal kembali — saat pending atau disetujui --}}
+                                @if(in_array($booking->status, ['pending', 'disetujui']))
+                                <button onclick="openEditTanggal({{ $booking->id }}, '{{ $booking->tanggal_pengembalian->format('Y-m-d') }}', '{{ $booking->tanggal_peminjaman->format('Y-m-d') }}')"
+                                    class="ml-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-md transition-colors">
+                                    <i class="fas fa-pencil-alt text-[9px]"></i> Edit
+                                </button>
+                                @endif
                             </div>
                             @endif
                             @if($booking->penanggungJawab)
@@ -547,4 +545,63 @@ function closeEditTanggal() {
     @endif
 
 </div>
+
+{{-- Modal Edit Tanggal Pengembalian --}}
+<div id="editTanggalModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeEditTanggal()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 z-10">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="font-bold text-slate-900 text-[15px]">Edit Tanggal Pengembalian</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Permohonan masih bisa diedit selama menunggu review</p>
+            </div>
+            <button onclick="closeEditTanggal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+                <i class="fas fa-times text-slate-500 text-xs"></i>
+            </button>
+        </div>
+
+        <form id="editTanggalForm" method="POST">
+            @csrf
+            @method('PATCH')
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tanggal Pengembalian Baru</label>
+                    <input type="date" id="editTanggalInput" name="tanggal_pengembalian" required
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-[13px] font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeEditTanggal()"
+                        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-[12px] font-bold hover:bg-slate-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        style="background-color: #2563eb;"
+                        class="flex-1 py-2.5 rounded-xl hover:bg-blue-700 text-white text-[12px] font-bold transition-colors">
+                        <i class="fas fa-save mr-1.5"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditTanggal(bookingId, currentDate, minDate) {
+    const modal = document.getElementById('editTanggalModal');
+    const form  = document.getElementById('editTanggalForm');
+    const input = document.getElementById('editTanggalInput');
+
+    form.action = '/booking/' + bookingId + '/update-tanggal';
+    input.value = currentDate;
+    input.min   = minDate;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function closeEditTanggal() {
+    const modal = document.getElementById('editTanggalModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+</script>
 @endsection
