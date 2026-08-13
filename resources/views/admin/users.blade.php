@@ -143,7 +143,8 @@
                                         data-id="{{ $user->id }}"
                                         data-nama="{{ $user->name }}"
                                         onclick="openResetModal(this)"
-                                        class="w-full px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded-lg transition-colors inline-flex items-center justify-center gap-1.5">
+                                        style="background-color: #f59e0b;"
+                                        class="w-full px-3 py-1.5 hover:bg-amber-600 text-white text-[11px] font-bold rounded-lg transition-colors inline-flex items-center justify-center gap-1.5">
                                         <i class="fas fa-key text-xs"></i> Ubah Password
                                     </button>
 
@@ -217,7 +218,8 @@
                     Batal
                 </button>
                 <button type="submit"
-                    class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-[13px] font-bold rounded-xl transition-colors">
+                    style="background-color: #f59e0b;"
+                    class="flex-1 py-2.5 hover:bg-amber-600 text-white text-[13px] font-bold rounded-xl transition-colors">
                     <i class="fas fa-key mr-1"></i> Simpan Password
                 </button>
             </div>

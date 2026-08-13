@@ -290,7 +290,8 @@
                         Batal
                     </button>
                     <button type="submit"
-                        class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-bold transition-colors">
+                        style="background-color: #2563eb;"
+                        class="flex-1 py-2.5 rounded-xl hover:bg-blue-700 text-white text-[12px] font-bold transition-colors">
                         <i class="fas fa-save mr-1.5"></i> Simpan
                     </button>
                 </div>
@@ -318,16 +319,6 @@ function closeEditTanggal() {
     modal.classList.remove('flex');
 }
 </script>
-@endsection
-
-
-    {{-- Stats Row --}}
-    @php
-        $allBookings = \App\Models\Booking::where('user_id', Auth::id())->get();
-        $cPending   = $allBookings->where('status','pending')->count();
-        $cDisetujui = $allBookings->where('status','disetujui')->count();
-        $cDitolak   = $allBookings->where('status','ditolak')->count();
-        $cSelesai   = $allBookings->where('status','selesai')->count();
     @endphp
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
