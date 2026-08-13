@@ -269,6 +269,55 @@ class WhatsAppService
     }
 
     /**
+     * Kirim notifikasi ke PJ dan Admin bahwa peminjam mengubah tanggal pengembalian.
+     */
+    public function notifyUbahTanggal(array $data): void
+    {
+        $message = $this->buildMessageUbahTanggal($data);
+
+        // Kirim ke PJ yang bertugas (jika ada no WA)
+        if (!empty($data['pj_no_wa'])) {
+            $this->send($data['pj_no_wa'], $message, $data['booking_id'] ?? null, 'UbahTanggal-PJ');
+        }
+
+        // Kirim ke Admin utama
+        if (!empty($data['admin_no_wa'])) {
+            $this->send($data['admin_no_wa'], $message, $data['booking_id'] ?? null, 'UbahTanggal-Admin');
+        }
+    }
+
+    /**
+     * Template pesan notifikasi perubahan tanggal pengembalian.
+     */
+    protected function buildMessageUbahTanggal(array $data): string
+    {
+        $lines = [
+            "📅 *[PERUBAHAN TANGGAL PENGEMBALIAN — UPT STAIMAS]*",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "Informasi penting mengenai permohonan peminjaman yang sudah disetujui:",
+            "",
+            "👤 *Peminjam*        : {$data['nama_peminjam']}",
+            "📱 *No. WhatsApp*    : {$data['no_wa_peminjam']}",
+            "",
+            "🏷 *Item Dipinjam*   : {$data['nama_item']}",
+            "📅 *Tgl Pinjam*     : {$data['tanggal_peminjaman']}",
+            "",
+            "🔄 *Perubahan Tanggal Pengembalian:*",
+            "   Lama : {$data['tanggal_lama']}",
+            "   Baru : *{$data['tanggal_baru']}*",
+            "",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "Harap catat perubahan ini dan pastikan item dikembalikan sesuai tanggal baru.",
+            "",
+            "🔗 Lihat detail di dashboard admin:",
+            config('app.url') . "/admin/dashboard",
+            "",
+            "_Bot Portal UPT Studio & Lab STAIMAS Wonogiri_",
+        ];
+
+        return implode("\n", $lines);
+    }
+    /**
      * Kirim notifikasi deadline pengembalian ke peminjam.
      */
     public function notifyDeadlinePengembalian(array $data): bool

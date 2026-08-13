@@ -52,6 +52,7 @@ Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
 // Dashboard User & Fitur Terproteksi Auth
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::patch('/booking/{booking}/update-tanggal', [UserDashboardController::class, 'updateTanggal'])->name('user.booking.update-tanggal');
     
     // Peminjaman Terproteksi Login
     Route::get('/peminjaman/ruangan', [PageController::class, 'peminjamanRuangan'])->name('pages.peminjaman.ruangan');

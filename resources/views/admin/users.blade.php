@@ -136,14 +136,14 @@
                             </td>
 
                             {{-- Aksi --}}
-                            <td class="px-6 py-4">
-                                <div class="flex flex-col gap-2">
+                            <td class="px-6 py-4 min-w-[200px]">
+                                <div class="flex flex-col gap-1.5">
                                     {{-- Ubah Password --}}
                                     <button
                                         data-id="{{ $user->id }}"
                                         data-nama="{{ $user->name }}"
                                         onclick="openResetModal(this)"
-                                        class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                                        class="w-full px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded-lg transition-colors inline-flex items-center justify-center gap-1.5">
                                         <i class="fas fa-key text-xs"></i> Ubah Password
                                     </button>
 
@@ -154,7 +154,7 @@
                                         @method('DELETE')
                                         <button type="button"
                                             onclick="if(confirm('Hapus akun {{ addslashes($user->name) }}? Semua data peminjaman terkait juga akan terpengaruh.')) document.getElementById('del-user-{{ $user->id }}').submit()"
-                                            class="w-full px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                                            class="w-full px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-[11px] font-bold rounded-lg transition-colors inline-flex items-center justify-center gap-1.5">
                                             <i class="fas fa-trash text-xs"></i> Hapus Akun
                                         </button>
                                     </form>

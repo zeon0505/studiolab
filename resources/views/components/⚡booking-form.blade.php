@@ -15,32 +15,32 @@ new class extends Component
     use WithFileUploads;
 
     // Form inputs
-    public $nama_peminjam;
-    public $instansi_peminjam;
-    public $bukti_peminjam; // KTM/KTP upload
-    public $tanggal_peminjaman;
-    public $tanggal_pengembalian;
+    public ?string $nama_peminjam = null;
+    public ?string $instansi_peminjam = null;
+    public mixed $bukti_peminjam = null; // KTM/KTP upload
+    public ?string $tanggal_peminjaman = null;
+    public ?string $tanggal_pengembalian = null;
     
     // Waktu booking jam (khusus ruangan)
-    public $jam_mulai;
-    public $jam_selesai;
+    public ?string $jam_mulai = null;
+    public ?string $jam_selesai = null;
     
-    public $no_wa;
-    public $catatan;
+    public ?string $no_wa = null;
+    public ?string $catatan = null;
 
     // Kapasitas Kursi (khusus Ruangan)
-    public $jumlah_kursi = 1;
-    public $maxKapasitasKursi = 0;
+    public int $jumlah_kursi = 1;
+    public int $maxKapasitasKursi = 0;
 
     // Menu Pemisah Mutlak
-    public $mode = 'ruangan'; // peralatan / ruangan
+    public string $mode = 'ruangan'; // peralatan / ruangan
     
-    public $kategori = 'studio'; // studio / laboratorium
-    public $selected_item_id = ''; // Pilihan item
+    public string $kategori = 'studio'; // studio / laboratorium
+    public string $selected_item_id = ''; // Pilihan item
 
     // PJ bertugas harian
-    public $currentPjName = '';
-    public $currentPjId = null;
+    public string $currentPjName = '';
+    public ?int $currentPjId = null;
 
     // Options list
     public $availableItems = [];
@@ -66,7 +66,7 @@ new class extends Component
         $this->loadItems();
     }
 
-    public function updatedSelectedItemId($value)
+    public function updatedSelectedItemId(mixed $value)
     {
         if ($this->mode === 'ruangan' && !empty($value)) {
             $item = Item::find($value);
