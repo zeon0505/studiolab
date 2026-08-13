@@ -245,83 +245,74 @@
 
                 {{-- Upload Bukti Pengembalian --}}
                 @if($booking->status === 'disetujui' && now()->startOfDay()->greaterThanOrEqualTo($booking->tanggal_pengembalian->startOfDay()))
-                <div class="mx-6 mb-5 border border-indigo-200 rounded-2xl overflow-hidden" id="upload-section-{{ $booking->id }}">
-                    {{-- Header --}}
-                    <div class="bg-indigo-600 px-5 py-3 flex items-center gap-2">
-                        <div class="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
-                            <i class="fas fa-camera text-white text-xs"></i>
+                <div class="mx-6 mb-5 border border-slate-100 rounded-2xl bg-slate-50/50 p-4" id="upload-section-{{ $booking->id }}">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 bg-slate-200 text-slate-600 rounded-lg flex items-center justify-center shrink-0">
+                            <i class="fas fa-camera text-[10px]"></i>
                         </div>
-                        <div>
-                            <p class="text-[12px] font-black text-white">Unggah Bukti Pengembalian</p>
-                            <p class="text-[10px] text-indigo-200">Foto barang yang sudah dikembalikan ke petugas</p>
-                        </div>
+                        <p class="text-xs font-bold text-slate-800">Unggah Bukti Pengembalian</p>
                     </div>
 
-                    <div class="bg-indigo-50/40 px-5 py-4">
-                        @if($booking->foto_pengembalian)
+                    @if($booking->foto_pengembalian)
                         {{-- Preview foto yang sudah diupload --}}
-                        <div class="flex items-center gap-3 bg-white border border-indigo-100 rounded-xl p-3 mb-3">
+                        <div class="flex items-center gap-3 bg-white border border-slate-150 rounded-xl p-3 mb-3">
                             <img src="{{ asset('storage/' . $booking->foto_pengembalian) }}"
-                                 class="w-14 h-14 rounded-xl object-cover border border-indigo-100 shrink-0" alt="Bukti Pengembalian">
+                                 class="w-12 h-12 rounded-xl object-cover border border-slate-100 shrink-0" alt="Bukti Pengembalian">
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-1.5 mb-1">
-                                    <span class="w-4 h-4 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
-                                        <i class="fas fa-check text-emerald-600 text-[8px]"></i>
+                                <div class="flex items-center gap-1">
+                                    <span class="w-3.5 h-3.5 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+                                        <i class="fas fa-check text-emerald-600 text-[7px]"></i>
                                     </span>
                                     <p class="text-xs font-bold text-slate-800">Bukti sudah diunggah</p>
                                 </div>
-                                <p class="text-[10px] text-slate-500 leading-relaxed">Menunggu verifikasi petugas UPT untuk mengubah status menjadi Selesai.</p>
+                                <p class="text-[10px] text-slate-500 mt-0.5">Menunggu verifikasi petugas untuk mengubah status menjadi Selesai.</p>
                             </div>
                         </div>
-                        <p class="text-[10px] text-indigo-600 font-semibold mb-2">Ganti foto jika diperlukan:</p>
-                        @else
-                        <p class="text-xs text-indigo-800 mb-3 leading-relaxed">
-                            Jika barang sudah dikembalikan secara fisik kepada petugas UPT, unggah foto sebagai bukti untuk mempercepat verifikasi.
+                        <p class="text-[10px] text-slate-600 font-bold mb-2">Ganti foto bukti:</p>
+                    @else
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            Jika barang/peralatan sudah dikembalikan, silakan unggah foto bukti serah terima untuk diverifikasi.
                         </p>
-                        @endif
+                    @endif
 
-                        <form action="{{ route('user.booking.upload-bukti', $booking->id) }}"
-                              method="POST" enctype="multipart/form-data"
-                              id="upload-form-{{ $booking->id }}">
-                            @csrf
+                    <form action="{{ route('user.booking.upload-bukti', $booking->id) }}"
+                          method="POST" enctype="multipart/form-data"
+                          id="upload-form-{{ $booking->id }}">
+                        @csrf
 
-                            {{-- Custom Drop Zone --}}
-                            <label for="foto-input-{{ $booking->id }}"
-                                   class="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-indigo-200 rounded-xl bg-white p-5 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-all group"
-                                   id="drop-label-{{ $booking->id }}">
-                                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
-                                    <i class="fas fa-cloud-upload-alt text-indigo-500 text-base"></i>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-xs font-bold text-indigo-700" id="drop-text-{{ $booking->id }}">Klik untuk pilih foto</p>
-                                    <p class="text-[10px] text-slate-400 mt-0.5">JPG, PNG, JPEG · Maks. 2MB</p>
-                                </div>
-                            </label>
-                            <input type="file"
-                                   name="foto_pengembalian"
-                                   id="foto-input-{{ $booking->id }}"
-                                   accept="image/*"
-                                   required
-                                   class="hidden"
-                                   onchange="previewFoto(this, {{ $booking->id }})">
-
-                            {{-- Preview sebelum submit --}}
-                            <div id="preview-container-{{ $booking->id }}" class="hidden mt-3 flex items-center justify-between gap-3 bg-white border border-indigo-200 rounded-xl p-3">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <img id="preview-img-{{ $booking->id }}" src="" alt="Preview" class="w-12 h-12 rounded-xl object-cover border border-indigo-100 shrink-0">
-                                    <div class="min-w-0">
-                                        <p class="text-xs font-bold text-slate-800 truncate" id="preview-name-{{ $booking->id }}"></p>
-                                        <p class="text-[10px] text-slate-400">Siap dikirim</p>
-                                    </div>
-                                </div>
-                                <button type="submit"
-                                        style="background-color:#4f46e5"
-                                        class="shrink-0 flex items-center gap-1.5 text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-90 transition-all shadow-sm">
-                                    <i class="fas fa-paper-plane text-[10px]"></i> Kirim
-                                </button>
+                        {{-- Custom Drop Zone --}}
+                        <label for="foto-input-{{ $booking->id }}"
+                               class="flex flex-col items-center justify-center gap-1.5 border border-dashed border-slate-200 rounded-xl bg-white p-4 cursor-pointer hover:border-slate-400 hover:bg-slate-50 transition-all group"
+                               id="drop-label-{{ $booking->id }}">
+                            <i class="fas fa-cloud-upload-alt text-slate-400 text-sm group-hover:scale-110 transition-transform"></i>
+                            <div class="text-center">
+                                <p class="text-[11px] font-bold text-slate-700" id="drop-text-{{ $booking->id }}">Klik untuk memilih foto</p>
+                                <p class="text-[9px] text-slate-400 mt-0.5">Maks. 2MB</p>
                             </div>
-                        </form>
-                    </div>
+                        </label>
+                        <input type="file"
+                               name="foto_pengembalian"
+                               id="foto-input-{{ $booking->id }}"
+                               accept="image/*"
+                               required
+                               class="hidden"
+                               onchange="previewFoto(this, {{ $booking->id }})">
+
+                        {{-- Preview sebelum submit --}}
+                        <div id="preview-container-{{ $booking->id }}" class="hidden mt-3 flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl p-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <img id="preview-img-{{ $booking->id }}" src="" alt="Preview" class="w-10 h-10 rounded-lg object-cover border border-slate-100 shrink-0">
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-slate-800 truncate" id="preview-name-{{ $booking->id }}"></p>
+                                    <p class="text-[9px] text-slate-400">Siap kirim</p>
+                                </div>
+                            </div>
+                            <button type="submit"
+                                    class="shrink-0 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 transition-all flex items-center gap-1 shadow-sm">
+                                <i class="fas fa-paper-plane text-[9px]"></i> Kirim
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <script>
@@ -334,8 +325,8 @@
                         document.getElementById('preview-img-' + bookingId).src = e.target.result;
                         document.getElementById('preview-name-' + bookingId).textContent = file.name;
                         document.getElementById('preview-container-' + bookingId).classList.remove('hidden');
-                        document.getElementById('drop-text-' + bookingId).textContent = '✓ Foto dipilih';
-                        document.getElementById('drop-label-' + bookingId).classList.add('border-indigo-400', 'bg-indigo-50');
+                        document.getElementById('drop-text-' + bookingId).textContent = '✓ Foto siap';
+                        document.getElementById('drop-label-' + bookingId).classList.add('border-slate-400');
                     };
                     reader.readAsDataURL(file);
                 }
