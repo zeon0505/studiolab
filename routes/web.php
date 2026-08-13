@@ -53,6 +53,8 @@ Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::patch('/booking/{booking}/update-tanggal', [UserDashboardController::class, 'updateTanggal'])->name('user.booking.update-tanggal');
+    Route::delete('/booking/{booking}/cancel', [UserDashboardController::class, 'cancel'])->name('user.booking.cancel');
+    Route::post('/booking/{booking}/upload-bukti', [UserDashboardController::class, 'uploadBuktiKembali'])->name('user.booking.upload-bukti');
     
     // Peminjaman Terproteksi Login
     Route::get('/peminjaman/ruangan', [PageController::class, 'peminjamanRuangan'])->name('pages.peminjaman.ruangan');
@@ -77,6 +79,7 @@ Route::middleware(['auth', 'staff'])->prefix('admin')->name('admin.')->group(fun
     
     // Konfirmasi Booking Peminjaman
     Route::get('/bookings/export-pdf', [AdminController::class, 'exportPdf'])->name('bookings.export-pdf');
+    Route::get('/bookings/export-csv', [AdminController::class, 'exportCsv'])->name('bookings.export-csv');
     Route::get('/bookings/{booking}', [AdminController::class, 'bookingShow'])->name('bookings.show');
     Route::post('/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus'])->name('bookings.status');
     

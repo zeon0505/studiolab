@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 
 class AdminController extends Controller
@@ -94,6 +95,26 @@ class AdminController extends Controller
         $countRuangan = Booking::whereHas('items', fn($q) => $q->where('tipe', 'ruangan'))->count();
         $countPeralatan = Booking::whereHas('items', fn($q) => $q->where('tipe', 'peralatan'))->count();
 
+        // --- DATA CHART 3: Tren 12 Bulan Terakhir ---
+        $monthlyLabels = [];
+        $monthlyData = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $monthDate = Carbon::today()->subMonths($i);
+            $monthlyLabels[] = $monthDate->translatedFormat('M Y');
+            $monthlyData[] = Booking::whereMonth('tanggal_peminjaman', $monthDate->month)
+                ->whereYear('tanggal_peminjaman', $monthDate->year)
+                ->count();
+        }
+
+        // --- DATA LIST: 5 Item Paling Sering Dipinjam ---
+        $topItems = \DB::table('booking_items')
+            ->join('items', 'booking_items.item_id', '=', 'items.id')
+            ->select('items.nama', 'items.tipe', \DB::raw('SUM(booking_items.jumlah) as total_dipinjam'))
+            ->groupBy('items.id', 'items.nama', 'items.tipe')
+            ->orderBy('total_dipinjam', 'desc')
+            ->limit(5)
+            ->get();
+
         return view('admin.dashboard', compact(
             'bookings', 
             'totalPending', 
@@ -101,7 +122,10 @@ class AdminController extends Controller
             'chartLabels',
             'chartData',
             'countRuangan',
-            'countPeralatan'
+            'countPeralatan',
+            'monthlyLabels',
+            'monthlyData',
+            'topItems'
         ));
     }
 
@@ -169,6 +193,61 @@ class AdminController extends Controller
         return $pdf->download('laporan-peminjaman-' . ($request->periode ?: 'semua') . '-' . now()->format('Y-m-d') . '.pdf');
     }
 
+    public function exportCsv(Request $request)
+    {
+        $query = Booking::with('items', 'penanggungJawab');
+
+        if ($request->filled('tipe')) {
+            $query->whereHas('items', fn($q) => $q->where('tipe', $request->tipe));
+        }
+
+        $filterPeriode = $request->periode ?: 'semua';
+        if ($request->filled('periode')) {
+            if ($request->periode === 'hari') {
+                $query->whereDate('tanggal_peminjaman', Carbon::today());
+            } elseif ($request->periode === 'minggu') {
+                $query->whereBetween('tanggal_peminjaman', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+            } elseif ($request->periode === 'bulan') {
+                $query->whereMonth('tanggal_peminjaman', Carbon::now()->month)
+                      ->whereYear('tanggal_peminjaman', Carbon::now()->year);
+            }
+        }
+
+        $bookings = $query->latest()->get();
+        $filename = 'rekap-peminjaman-' . $filterPeriode . '-' . now()->format('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $columns = ['#', 'Nama Peminjam', 'Instansi', 'Item Dipinjam', 'Tgl Peminjaman', 'Tgl Pengembalian', 'Status', 'No WA'];
+
+        $callback = function () use ($bookings, $columns) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM agar Excel baca UTF-8
+            fputcsv($file, $columns);
+
+            foreach ($bookings as $b) {
+                $namaItem = $b->items->pluck('nama')->implode(', ') ?: '-';
+                fputcsv($file, [
+                    '#BKG-' . str_pad($b->id, 4, '0', STR_PAD_LEFT),
+                    $b->nama_peminjam,
+                    $b->instansi_peminjam,
+                    $namaItem,
+                    $b->tanggal_peminjaman ? $b->tanggal_peminjaman->format('d/m/Y') : '-',
+                    $b->tanggal_pengembalian ? $b->tanggal_pengembalian->format('d/m/Y') : '-',
+                    ucfirst($b->status),
+                    $b->no_wa,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function storeUser(Request $request)
     {
         $request->validate([
@@ -191,7 +270,7 @@ class AdminController extends Controller
 
     public function bookingShow(Booking $booking)
     {
-        $booking->load('items', 'penanggungJawab');
+        $booking->load('items', 'penanggungJawab', 'bookingLogs', 'bookingLogs.user');
         return view('admin.booking_detail', compact('booking'));
     }
 
@@ -202,9 +281,20 @@ class AdminController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
+        $oldStatus = $booking->status;
+
         $booking->update([
             'status' => $request->status,
             'catatan' => $request->catatan,
+        ]);
+
+        // Catat audit log
+        \App\Models\BookingLog::create([
+            'booking_id'  => $booking->id,
+            'user_id'     => Auth::id(),
+            'from_status' => $oldStatus,
+            'to_status'   => $request->status,
+            'keterangan'  => $request->catatan ? "Status diubah oleh admin dengan catatan: {$request->catatan}" : "Status diubah oleh admin.",
         ]);
 
         // If returned / selesai or rejected, change item status/stock back

@@ -25,6 +25,7 @@ class Booking extends Model
         'status',
         'catatan',
         'reminder_sent',
+        'foto_pengembalian',
     ];
 
     protected $casts = [
@@ -56,5 +57,10 @@ class Booking extends Model
     public function penanggungJawab()
     {
         return $this->belongsTo(User::class, 'penanggung_jawab_id');
+    }
+
+    public function bookingLogs()
+    {
+        return $this->hasMany(BookingLog::class)->latest();
     }
 }

@@ -269,6 +269,40 @@ class WhatsAppService
     }
 
     /**
+     * Kirim notifikasi ke Admin bahwa user membatalkan bookingnya.
+     */
+    public function notifyBatalBooking(array $data): void
+    {
+        $message = $this->buildMessageBatalBooking($data);
+
+        if (!empty($data['admin_no_wa'])) {
+            $this->send($data['admin_no_wa'], $message, $data['booking_id'] ?? null, 'BatalBooking-Admin');
+        }
+    }
+
+    protected function buildMessageBatalBooking(array $data): string
+    {
+        $lines = [
+            "🚫 *[PEMBATALAN PEMINJAMAN — UPT STAIMAS]*",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "Peminjam telah membatalkan permohonannya:",
+            "",
+            "👤 *Peminjam*     : {$data['nama_peminjam']}",
+            "📱 *No. WA*       : {$data['no_wa_peminjam']}",
+            "",
+            "🏷 *Item*         : {$data['nama_item']}",
+            "📅 *Tgl Pinjam*  : {$data['tanggal_peminjaman']}",
+            "",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "Booking telah dibatalkan oleh peminjam secara mandiri.",
+            "",
+            "_Bot Portal UPT Studio & Lab STAIMAS Wonogiri_",
+        ];
+
+        return implode("\n", $lines);
+    }
+
+    /**
      * Kirim notifikasi ke PJ dan Admin bahwa peminjam mengubah tanggal pengembalian.
      */
     public function notifyUbahTanggal(array $data): void
@@ -335,11 +369,9 @@ class WhatsAppService
         return $this->send($targetPhone, $message, $data['booking_id'] ?? null, 'DeadlinePengembalian');
     }
 
-    /**
-     * Template pesan reminder deadline pengembalian ke peminjam.
-     */
     protected function buildMessageDeadlinePengembalian(array $data): string
     {
+        $waktu = $data['waktu_pengingat'] ?? 'HARI INI';
         $lines = [
             "⏰ *[PENGINGAT PENGEMBALIAN — UPT STAIMAS]*",
             "━━━━━━━━━━━━━━━━━━━━━━━━━━",
@@ -347,7 +379,7 @@ class WhatsAppService
             "",
             "Ini adalah pengingat otomatis dari sistem UPT Studio & Lab STAIMAS Wonogiri.",
             "",
-            "🔴 *HARI INI adalah batas akhir pengembalian* untuk peminjaman berikut:",
+            "🔴 *{$waktu} adalah batas akhir pengembalian* untuk peminjaman berikut:",
             "",
             "📋 *DETAIL PEMINJAMAN*",
             "━━━━━━━━━━━━━━━━━━━━━━━━━━",

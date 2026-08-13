@@ -73,6 +73,40 @@
         </div>
     </div>
 
+    {{-- Charts Section 2 --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {{-- Tren Bulanan Chart --}}
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
+            <h3 class="font-bold text-slate-800 text-[13px] mb-4">📅 Tren Peminjaman Bulanan (12 Bulan Terakhir)</h3>
+            <div class="h-60 relative w-full">
+                <canvas id="chartBulanan"></canvas>
+            </div>
+        </div>
+
+        {{-- Item Paling Populer --}}
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between">
+            <div>
+                <h3 class="font-bold text-slate-800 text-[13px] mb-4">🔥 5 Item Paling Sering Dipinjam</h3>
+                <div class="space-y-3">
+                    @forelse($topItems as $index => $item)
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center text-[10px] font-bold text-teal-700">{{ $index + 1 }}</span>
+                            <span class="text-xs font-bold text-slate-700 truncate max-w-[150px]">{{ $item->nama }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase font-extrabold">{{ $item->tipe }}</span>
+                            <span class="text-[11px] font-bold text-slate-900 bg-teal-50 text-teal-700 px-2 py-0.5 rounded-md">{{ $item->total_dipinjam }}x</span>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-xs text-slate-400 italic">Belum ada data peminjaman.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Table & Filter Actions --}}
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -191,10 +225,18 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <a href="{{ asset('storage/' . $booking->bukti_peminjam) }}" target="_blank"
-                                   class="inline-flex items-center gap-1.5 text-[12px] text-teal-600 font-medium hover:text-teal-800 hover:underline">
-                                    <i class="fas fa-file-image text-xs"></i> Lihat Bukti
-                                </a>
+                                <div class="flex flex-col gap-1">
+                                    <a href="{{ asset('storage/' . $booking->bukti_peminjam) }}" target="_blank"
+                                       class="inline-flex items-center gap-1.5 text-[12px] text-teal-600 font-medium hover:text-teal-800 hover:underline">
+                                        <i class="fas fa-file-image text-xs"></i> Bukti Pinjam
+                                    </a>
+                                    @if($booking->foto_pengembalian)
+                                        <a href="{{ asset('storage/' . $booking->foto_pengembalian) }}" target="_blank"
+                                           class="inline-flex items-center gap-1.5 text-[12px] text-indigo-600 font-medium hover:text-indigo-800 hover:underline">
+                                            <i class="fas fa-camera text-xs"></i> Bukti Kembali
+                                        </a>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
@@ -565,6 +607,52 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             },
             cutout: '65%'
+        }
+    });
+
+    // 3. Chart Bulanan (Bar Chart)
+    const ctxBulanan = document.getElementById('chartBulanan').getContext('2d');
+    new Chart(ctxBulanan, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($monthlyLabels) !!},
+            datasets: [{
+                label: 'Jumlah Pengajuan',
+                data: {!! json_encode($monthlyData) !!},
+                backgroundColor: '#3b82f6', // blue-500
+                borderRadius: 6,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        color: '#94a3b8'
+                    },
+                    grid: {
+                        borderDash: [5, 5],
+                        color: '#f1f5f9'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#94a3b8'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
         }
     });
 });

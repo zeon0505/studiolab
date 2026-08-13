@@ -35,6 +35,18 @@
                     <a href="{{ route('admin.history') }}" class="text-[11px] text-red-500 hover:text-red-700 font-bold">Reset</a>
                 @endif
             </form>
+
+            {{-- Tombol Export --}}
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{{ route('admin.bookings.export-pdf', request()->query()) }}"
+                   class="flex items-center gap-1.5 text-[11px] font-bold px-3 py-2 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors">
+                    <i class="fas fa-file-pdf text-xs"></i> Export PDF
+                </a>
+                <a href="{{ route('admin.bookings.export-csv', request()->query()) }}"
+                   class="flex items-center gap-1.5 text-[11px] font-bold px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors">
+                    <i class="fas fa-file-csv text-xs"></i> Export CSV
+                </a>
+            </div>
         </div>
 
         {{-- Tabel Riwayat --}}

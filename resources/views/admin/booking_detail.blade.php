@@ -124,6 +124,24 @@
                 </div>
             </div>
 
+            {{-- Bukti Pengembalian --}}
+            @if($booking->foto_pengembalian)
+            <div class="flex items-start gap-4 py-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                    <i class="fas fa-camera text-base"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Bukti Pengembalian (Upload User)</p>
+                    <div class="mt-2 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 max-w-[200px]">
+                        <a href="{{ asset('storage/' . $booking->foto_pengembalian) }}" target="_blank">
+                            <img src="{{ asset('storage/' . $booking->foto_pengembalian) }}" alt="Bukti Pengembalian" class="w-full h-auto max-h-40 object-cover hover:opacity-90 transition-opacity">
+                        </a>
+                    </div>
+                    <p class="text-[9px] text-slate-400 mt-1 italic">Klik gambar untuk memperbesar</p>
+                </div>
+            </div>
+            @endif
+
             {{-- PJ & Catatan --}}
             @if($booking->catatan)
             <div class="flex items-start gap-4 py-3.5">
@@ -137,6 +155,34 @@
             </div>
             @endif
         </div>
+    </div>
+
+    {{-- Audit Log Card --}}
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-6 p-6">
+        <h3 class="font-bold text-slate-900 text-sm mb-4"><i class="fas fa-history text-slate-500 mr-2"></i>Riwayat Perubahan Status</h3>
+        @if($booking->bookingLogs->isEmpty())
+            <p class="text-xs text-slate-400 italic">Belum ada riwayat aktivitas.</p>
+        @else
+            <div class="relative border-l border-slate-200 ml-3 space-y-5">
+                @foreach($booking->bookingLogs as $log)
+                <div class="relative pl-6">
+                    <div class="absolute -left-1.5 mt-1.5 w-3 h-3 rounded-full bg-slate-200 border-2 border-white"></div>
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-bold text-slate-700">
+                            {{ $log->user ? $log->user->name : 'Sistem' }}
+                        </span>
+                        <span class="text-[10px] text-slate-400">{{ $log->created_at->diffForHumans() }}</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Mengubah status dari <span class="font-semibold text-slate-600">{{ $log->from_status ?: 'Baru' }}</span> ke <span class="font-semibold text-slate-800">{{ $log->to_status }}</span>.
+                    </p>
+                    @if($log->keterangan)
+                        <p class="text-xs bg-slate-50 border border-slate-100 text-slate-600 px-3 py-2 rounded-xl mt-1.5 italic">"{{ $log->keterangan }}"</p>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     {{-- Admin Actions Form --}}
